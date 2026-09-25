@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkEZ Portal - Shree Pant Nagari Co-Op Housing Society</title>
+    <!-- Chart.js for Peak Hour Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf for Downloadable Payment Receipts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-card: #151c2c;
+            --bg-sidebar: #111827;
+            --border-color: #1f293d;
+            --text-main: #f3f4f6;
+            --text-sub: #9ca3af;
+            --accent-blue: #0284c7;
+            --accent-green: #16a34a;
+            --accent-yellow: #ca8a04;
+            --accent-purple: #9333ea;
+        }
+
+        .light-theme {
+            --bg-main: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-sidebar: #0f172a;
+            --border-color: #cbd5e1;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        /* 1. DEDICATED FULL-SCREEN LOGIN PAGE */
+        #loginScreen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: rgba(30, 41, 59, 0.95);
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+            text-align: center;
+        }
+
+        .login-box h2 { margin: 0 0 5px 0; color: #38bdf8; font-size: 26px; }
+        .login-box p { color: #94a3b8; font-size: 13px; margin-bottom: 25px; }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text-main);
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent-blue);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* 2. APP LAYOUT STRUCTURE */
+        #appContainer {
+            display: none; /* Hidden until login */
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* SIDEBAR / SIDE BANNER */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            color: #ffffff;
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px;
+            border-bottom: 1px solid #1e293b;
+        }
+        .sidebar-brand h2 { margin: 0; color: #38bdf8; font-size: 20px; }
+        .sidebar-brand span { font-size: 11px; color: #94a3b8; }
+
+        .nav-menu {
+            list-style: none;
+            padding: 15px 0;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .nav-category {
+            padding: 12px 20px 6px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #cbd5e1;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: #1e293b;
+            color: #38bdf8;
+            border-left: 4px solid #38bdf8;
+        }
+
+        .sub-menu {
+            list-style: none;
+            padding-left: 40px;
+            margin: 0;
+        }
+        .sub-menu li {
+            padding: 8px 0;
+            font-size: 13px;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+        .sub-menu li:hover { color: #ffffff; }
+
+        /* MAIN CONTENT AREA */
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .top-header {
+            height: 65px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .content-body {
+            padding: 30px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .view-panel { display: none; }
+        .view-panel.active { display: block; }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* PARKING SLOT INDICATORS */
+        .slots-container { display: flex; gap: 15px; margin: 20px 0; }
+        .slot {
+            flex: 1; padding: 20px 10px; border-radius: 10px;
+            text-align: center; font-weight: bold; font-size: 16px;
+        }
+        .free { background: #166534; color: #4ade80; border: 2px solid #22c55e; }
+        .occupied { background: #991b1b; color: #fca5a5; border: 2px solid #ef4444; }
+        .reserved { background: #854d0e; color: #fef08a; border: 2px solid #eab308; }
+
+        /* MODALS */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 2000;
+        }
+        .modal-content {
+            background: var(--bg-card); padding: 30px; border-radius: 12px; width: 90%; max-width: 400px;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. FULL SCREEN DEDICATED LOGIN PAGE -->
+    <div id="loginScreen">
+        <div class="login-box">
+            <h2>ParkEZ Portal</h2>
+            <p>Shree Pant Nagari Co-Op Housing Society Ltd.</p>
+            <form onsubmit="handleLogin(event)">
+                <input type="text" id="userFlat" placeholder="Flat / Unit No. (e.g. A-302)" required>
+                <input type="password" id="userPass" placeholder="Resident Security PIN" required>
+                <button type="submit" class="btn" style="background: var(--accent-blue);">Login to Resident Portal</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. MAIN APP INTERFACE WITH SIDEBAR -->
+    <div id="appContainer">
+        <div style="display: flex; height: 100%; width: 100%;">
+            
+            <!-- SIDEBAR / SIDE BANNER -->
+            <div class="sidebar">
+                <div class="sidebar-brand">
+                    <h2>ParkEZ Ecosystem</h2>
+                    <span>Shree Pant Nagari Society</span>
+                </div>
+
+                <ul class="nav-menu">
+                    <div class="nav-category">Main Menu</div>
+                    <li class="nav-item active" onclick="switchView('dashboardView', this)">
+                        <span>📊</span> Overview Dashboard
+                    </li>
+                    
+                    <div class="nav-category">Parking Operations</div>
+                    <li class="nav-item" onclick="switchView('parkingView', this)">
+                        <span>🚗</span> Live Slots & Gate Control
+                    </li>
+                    <ul class="sub-menu">
+                        <li onclick="switchView('parkingView', this)">• Real-time Sensor Status</li>
+                        <li onclick="switchView('parkingView', this)">• Pre-Booking (Yellow Hold)</li>
+                    </ul>
+
+                    <div class="nav-category">Billing & Passes</div>
+                    <li class="nav-item" onclick="switchView('billingView', this)">
+                        <span>💳</span> Subscriptions & Receipts
+                    </li>
+                    <ul class="sub-menu">
+                        <li onclick="switchView('billingView', this)">• Monthly Auto-Pay</li>
+                        <li onclick="switchView('billingView', this)">• Download E-Receipts</li>
+                    </ul>
+
+                    <div class="nav-category">Society Services</div>
+                    <li class="nav-item" onclick="switchView('carwashView', this)">
+                        <span>🧼</span> Car Washing Booking
+                    </li>
+                    <li class="nav-item" onclick="switchView('analyticsView', this)">
+                        <span>📈</span> Peak Hour Analytics
+                    </li>
+                </ul>
+            </div>
+
+            <!-- MAIN WORKSPACE -->
+            <div class="main-wrapper">
+                
+                <!-- TOP HEADER -->
+                <div class="top-header">
+                    <h3 id="currentViewTitle" style="margin:0; color:#38bdf8;">Overview Dashboard</h3>
+                    <div class="user-profile">
+                        <span id="activeUserDisplay" style="font-size: 14px; font-weight: 600;">Flat: A-302</span>
+                        <button class="btn" style="width: auto; padding: 6px 12px; margin: 0;" onclick="toggleTheme()">🌓 Theme</button>
+                        <button class="btn" style="width: auto; padding: 6px 12px; margin: 0; background: #dc2626;" onclick="handleLogout()">Logout</button>
+                    </div>
+                </div>
+
+                <!-- BODY CONTENT VIEWS -->
+                <div class="content-body">
+                    
+                    <!-- VIEW 1: OVERVIEW DASHBOARD -->
+                    <div id="dashboardView" class="view-panel active">
+                        <div class="grid-3">
+                            <div class="card">
+                                <h4>Available Spaces</h4>
+                                <h1 style="font-size: 42px; color: #22c55e; margin: 10px 0;" id="dashAvail">3 / 3</h1>
+                                <p style="font-size: 12px; color: var(--text-sub);">Connected to ESP32 local network</p>
+                            </div>
+                            <div class="card">
+                                <h4>Subscription Status</h4>
+                                <h2 style="color: #ef4444; margin: 15px 0;" id="dashSub">INACTIVE</h2>
+                                <button class="btn" style="background: var(--accent-green);" onclick="switchView('billingView', null)">Renew Monthly Pass</button>
+                            </div>
+                            <div class="card">
+                                <h4>Quick Pre-Book</h4>
+                                <p style="font-size: 12px; color: var(--text-sub);">Hold a spot prior to arrival home</p>
+                                <button class="btn" style="background: var(--accent-yellow);" onclick="switchView('parkingView', null)">Reserve Slot Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 2: PARKING & PRE-BOOKING -->
+                    <div id="parkingView" class="view-panel">
+                        <div class="card">
+                            <h3>Live Parking Slots (ESP32 Sensor Sync)</h3>
+                            <div class="slots-container">
+                                <div id="slot1" class="slot free">Slot 1<br><span id="txt1">FREE</span></div>
+                                <div id="slot2" class="slot free">Slot 2<br><span id="txt2">FREE</span></div>
+                                <div id="slot3" class="slot free">Slot 3<br><span id="txt3">FREE</span></div>
+                            </div>
+                            
+                            <h4>Pre-Booking System (15-20 Min Yellow Hold)</h4>
+                            <select id="slotSelect">
+                                <option value="1">Reserve Slot 1</option>
+                                <option value="2">Reserve Slot 2</option>
+                                <option value="3">Reserve Slot 3</option>
+                            </select>
+                            <button class="btn" style="background: var(--accent-yellow);" onclick="triggerPreBook()">📌 Pre-Book Selected Slot</button>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 3: BILLING & RECEIPTS -->
+                    <div id="billingView" class="view-panel">
+                        <div class="grid-3">
+                            <div class="card">
+                                <h3>Monthly Resident Pass</h3>
+                                <p>Fee: ₹1,000 / Month</p>
+                                <label style="font-size: 13px;">
+                                    <input type="checkbox" id="autoPayBox" style="width: auto;"> Enable Auto-Debit on 1st
+                                </label>
+                                <button class="btn" style="background: var(--accent-green);" onclick="openPayModal('Monthly Subscription', 1000)">Pay ₹1,000 via UPI</button>
+                            </div>
+                            <div class="card">
+                                <h3>Transaction History</h3>
+                                <p style="font-size: 12px; color: var(--text-sub);">Download verified digital e-receipts</p>
+                                <button class="btn" onclick="generateReceiptModal()">📄 Download Last PDF Receipt</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 4: CAR WASH SERVICE -->
+                    <div id="carwashView" class="view-panel">
+                        <div class="card" style="max-width: 500px;">
+                            <h3>Book Society Car Wash</h3>
+                            <p style="font-size: 12px; color: var(--text-sub);">Notifies appointed cleaner Ramesh K. automatically</p>
+                            <select id="washPackage">
+                                <option value="Basic Foam Wash - ₹200">Basic Foam Wash (₹200)</option>
+                                <option value="Deep Interior & Exterior - ₹500">Deep Interior & Exterior (₹500)</option>
+                            </select>
+                            <button class="btn" style="background: var(--accent-purple);" onclick="bookWashService()">🧼 Confirm & Pay</button>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 5: PEAK HOUR ANALYTICS -->
+                    <div id="analyticsView" class="view-panel">
+                        <div class="card">
+                            <h3>Evening Peak Hour Occupancy Tracker</h3>
+                            <p style="font-size: 12px; color: var(--text-sub);">Tracks peak hours when residents return home from work</p>
+                            <canvas id="peakChartCanvas" height="120"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAYMENT MODAL -->
+    <div id="payModal" class="modal">
+        <div class="modal-content">
+            <h3 id="payModalTitle">Payment Checkout</h3>
+            <p id="payAmountText" style="font-size: 18px; font-weight: bold; color: #38bdf8;"></p>
+            <div style="background: white; color: black; padding: 15px; border-radius: 8px; text-align: center; margin: 15px 0;">
+                [ UPI QR CODE ]<br><small>pay@shreepantnagari</small>
+            </div>
+            <button class="btn" style="background: var(--accent-green);" onclick="completePayment()">Confirm Payment</button>
+            <button class="btn" style="background: #dc2626;" onclick="closeModal('payModal')">Cancel</button>
+        </div>
+    </div>
+
+    <!-- RECEIPT MODAL -->
+    <div id="receiptModal" class="modal">
+        <div class="modal-content" style="max-width: 420px;">
+            <div id="pdfArea" style="background: white; color: black; padding: 20px; border-radius: 8px;">
+                <h2 style="margin:0; color:#0284c7;">ParkEZ Receipt</h2>
+                <p style="font-size:12px; margin-bottom:15px;">Shree Pant Nagari Co-Op Housing Society</p>
+                <hr>
+                <p><strong>Resident Flat:</strong> <span id="rFlat">A-302</span></p>
+                <p><strong>Service:</strong> Monthly Subscription Pass</p>
+                <p><strong>Amount Paid:</strong> ₹1,000</p>
+                <p><strong>Txn ID:</strong> <span id="rTxn">TXN-881920</span></p>
+                <hr>
+                <p style="font-size:10px; text-align:center;">Official E-Receipt</p>
+            </div>
+            <button class="btn" style="background: var(--accent-green); margin-top:15px;" onclick="downloadPDF()">Download PDF</button>
+            <button class="btn" style="background: #dc2626;" onclick="closeModal('receiptModal')">Close</button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT ARCHITECTURE -->
+    <script>
+        let currentResident = null;
+        let slots = ["free", "free", "free"];
+        let payAmount = 0;
+
+        // LOGIN HANDLER
+        function handleLogin(e) {
+            e.preventDefault();
+            let flat = document.getElementById("userFlat").value;
+            if (flat) {
+                currentResident = flat;
+                document.getElementById("activeUserDisplay").innerText = "Flat: " + currentResident;
+                document.getElementById("loginScreen").style.display = "none";
+                document.getElementById("appContainer").style.display = "block";
+                initAnalyticsChart();
+            }
+        }
+
+        function handleLogout() {
+            document.getElementById("appContainer").style.display = "none";
+            document.getElementById("loginScreen").style.display = "flex";
+        }
+
+        // NAVIGATION VIEW SWITCHING
+        function switchView(viewId, element) {
+            document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+
+            if (element) {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                element.classList.add('active');
+            }
+
+            // Update Header Title
+            let titles = {
+                'dashboardView': 'Overview Dashboard',
+                'parkingView': 'Live Slots & Gate Control',
+                'billingView': 'Subscriptions & E-Receipts',
+                'carwashView': 'Society Car Wash Service',
+                'analyticsView': 'Peak Hour Occupancy Analytics'
+            };
+            document.getElementById("currentViewTitle").innerText = titles[viewId];
+        }
+
+        // PRE-BOOKING LOGIC
+        function triggerPreBook() {
+            let slotNum = document.getElementById("slotSelect").value;
+            let idx = slotNum - 1;
+
+            if (slots[idx] === "free") {
+                slots[idx] = "reserved";
+                let elem = document.getElementById("slot" + slotNum);
+                let txt = document.getElementById("txt" + slotNum);
+                elem.className = "slot reserved";
+                txt.innerText = "HOLD";
+                alert("Slot " + slotNum + " reserved with yellow indicator light!");
+            } else {
+                alert("Slot is unavailable for pre-booking.");
+            }
+        }
+
+        // PAYMENT & RECEIPT
+        function openPayModal(title, amt) {
+            payAmount = amt;
+            document.getElementById("payModalTitle").innerText = title;
+            document.getElementById("payAmountText").innerText = "Total: ₹" + amt;
+            document.getElementById("payModal").style.display = "flex";
+        }
+
+        function completePayment() {
+            closeModal('payModal');
+            document.getElementById("dashSub").innerText = "ACTIVE";
+            document.getElementById("dashSub").style.color = "#22c55e";
+            alert("Payment of ₹" + payAmount + " successful!");
+        }
+
+        function closeModal(id) { document.getElementById(id).style.display = "none"; }
+
+        function generateReceiptModal() {
+            document.getElementById("rFlat").innerText = currentResident || "A-302";
+            document.getElementById("rTxn").innerText = "TXN-" + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById("receiptModal").style.display = "flex";
+        }
+
+        function downloadPDF() {
+            let elem = document.getElementById('pdfArea');
+            html2pdf().from(elem).save('ParkEZ_Receipt.pdf');
+        }
+
+        function bookWashService() {
+            openPayModal("Car Wash Service", 200);
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("light-theme");
+        }
+
+        // CHART.JS INITIALIZATION
+        function initAnalyticsChart() {
+            let ctx = document.getElementById('peakChartCanvas').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['4 PM', '5 PM', '6 PM', '7 PM', '8 PM (Peak)', '9 PM', '10 PM', '11 PM'],
+                    datasets: [{
+                        label: 'Occupancy Level (%)',
+                        data: [20, 35, 60, 85, 100, 95, 90, 80],
+                        borderColor: '#38bdf8',
+                        backgroundColor: 'rgba(56, 189, 248, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: { responsive: true }
+            });
+        }
+    </script>
+</body>
+</html>
