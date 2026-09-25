@@ -19,6 +19,7 @@
             --accent-blue: #0284c7;
             --accent-green: #16a34a;
             --accent-yellow: #ca8a04;
+            --accent-red: #dc2626;
             --accent-purple: #9333ea;
         }
 
@@ -43,7 +44,7 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 1. DEDICATED FULL-SCREEN LOGIN PAGE */
+        /* DEDICATED FULL-SCREEN LOGIN PAGE */
         #loginScreen {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -93,14 +94,13 @@
         }
         .btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
-        /* 2. APP LAYOUT STRUCTURE */
+        /* APP LAYOUT STRUCTURE */
         #appContainer {
-            display: none; /* Hidden until login */
+            display: none;
             height: 100vh;
             width: 100vw;
         }
 
-        /* SIDEBAR / SIDE BANNER */
         .sidebar {
             width: 260px;
             background-color: var(--bg-sidebar);
@@ -111,126 +111,117 @@
             color: #ffffff;
         }
 
-        .sidebar-brand {
-            padding: 24px 20px;
-            border-bottom: 1px solid #1e293b;
-        }
+        .sidebar-brand { padding: 24px 20px; border-bottom: 1px solid #1e293b; }
         .sidebar-brand h2 { margin: 0; color: #38bdf8; font-size: 20px; }
         .sidebar-brand span { font-size: 11px; color: #94a3b8; }
 
-        .nav-menu {
-            list-style: none;
-            padding: 15px 0;
-            margin: 0;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
+        .nav-menu { list-style: none; padding: 15px 0; margin: 0; flex-grow: 1; overflow-y: auto; }
+        .nav-category { padding: 12px 20px 6px 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; }
+        .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 12px; color: #cbd5e1; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+        .nav-item:hover, .nav-item.active { background-color: #1e293b; color: #38bdf8; border-left: 4px solid #38bdf8; }
 
-        .nav-category {
-            padding: 12px 20px 6px 20px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #64748b;
-            letter-spacing: 0.05em;
-        }
+        .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        .top-header { height: 65px; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; }
+        .user-profile { display: flex; align-items: center; gap: 15px; }
 
-        .nav-item {
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #cbd5e1;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background-color: #1e293b;
-            color: #38bdf8;
-            border-left: 4px solid #38bdf8;
-        }
-
-        .sub-menu {
-            list-style: none;
-            padding-left: 40px;
-            margin: 0;
-        }
-        .sub-menu li {
-            padding: 8px 0;
-            font-size: 13px;
-            color: #94a3b8;
-            cursor: pointer;
-        }
-        .sub-menu li:hover { color: #ffffff; }
-
-        /* MAIN CONTENT AREA */
-        .main-wrapper {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .top-header {
-            height: 65px;
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 30px;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .content-body {
-            padding: 30px;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
+        .content-body { padding: 30px; overflow-y: auto; flex-grow: 1; }
         .view-panel { display: none; }
         .view-panel.active { display: block; }
 
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        .card { background: var(--bg-card); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 20px; }
+
+        /* PARKING FULL ALERT BANNER */
+        #fullAlertBanner {
+            display: none;
+            background: #991b1b;
+            color: #fef2f2;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            border: 2px solid #ef4444;
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite;
         }
 
-        .card {
-            background: var(--bg-card);
-            padding: 24px;
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* 2D VISUAL PARKING MAP LAYOUT */
+        .parking-map-container {
+            background: #090d16;
+            border: 2px dashed #334155;
             border-radius: 12px;
-            border: 1px solid var(--border-color);
+            padding: 25px;
+            margin: 20px 0;
+            position: relative;
         }
 
-        /* PARKING SLOT INDICATORS */
-        .slots-container { display: flex; gap: 15px; margin: 20px 0; }
-        .slot {
-            flex: 1; padding: 20px 10px; border-radius: 10px;
-            text-align: center; font-weight: bold; font-size: 16px;
+        .map-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f293d; padding-bottom: 10px; margin-bottom: 20px; }
+        
+        .driveway-lane {
+            background: #1e293b;
+            height: 50px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 12px;
+            letter-spacing: 2px;
+            font-weight: bold;
+            border: 1px dashed #475569;
+            margin-bottom: 20px;
         }
-        .free { background: #166534; color: #4ade80; border: 2px solid #22c55e; }
-        .occupied { background: #991b1b; color: #fca5a5; border: 2px solid #ef4444; }
-        .reserved { background: #854d0e; color: #fef08a; border: 2px solid #eab308; }
+
+        .map-slots-grid { display: flex; justify-content: space-around; gap: 15px; }
+
+        .map-slot-box {
+            flex: 1;
+            height: 140px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            font-weight: bold;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .map-slot-box .car-icon { font-size: 32px; margin-top: 10px; }
+        .map-slot-box .slot-name { font-size: 16px; letter-spacing: 1px; }
+        .map-slot-box .status-pill {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+        }
+
+        /* Slot Colors */
+        .slot-free { background: rgba(22, 101, 52, 0.3); border: 2px solid #22c55e; color: #4ade80; }
+        .slot-free .status-pill { background: #166534; color: #4ade80; }
+
+        .slot-occupied { background: rgba(153, 27, 27, 0.3); border: 2px solid #ef4444; color: #fca5a5; }
+        .slot-occupied .status-pill { background: #991b1b; color: #fca5a5; }
+
+        .slot-reserved { background: rgba(133, 77, 14, 0.3); border: 2px solid #eab308; color: #fef08a; }
+        .slot-reserved .status-pill { background: #854d0e; color: #fef08a; }
+
+        .map-legend { display: flex; gap: 15px; justify-content: center; margin-top: 15px; font-size: 12px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
 
         /* MODALS */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 2000;
-        }
-        .modal-content {
-            background: var(--bg-card); padding: 30px; border-radius: 12px; width: 90%; max-width: 400px;
-            border: 1px solid var(--border-color);
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: var(--bg-card); padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
@@ -252,7 +243,7 @@
     <div id="appContainer">
         <div style="display: flex; height: 100%; width: 100%;">
             
-            <!-- SIDEBAR / SIDE BANNER -->
+            <!-- SIDEBAR -->
             <div class="sidebar">
                 <div class="sidebar-brand">
                     <h2>ParkEZ Ecosystem</h2>
@@ -262,30 +253,22 @@
                 <ul class="nav-menu">
                     <div class="nav-category">Main Menu</div>
                     <li class="nav-item active" onclick="switchView('dashboardView', this)">
-                        <span>📊</span> Overview Dashboard
+                        <span>📊</span> Overview & Live Map
                     </li>
                     
                     <div class="nav-category">Parking Operations</div>
                     <li class="nav-item" onclick="switchView('parkingView', this)">
-                        <span>🚗</span> Live Slots & Gate Control
+                        <span>🚗</span> Slot Pre-Booking
                     </li>
-                    <ul class="sub-menu">
-                        <li onclick="switchView('parkingView', this)">• Real-time Sensor Status</li>
-                        <li onclick="switchView('parkingView', this)">• Pre-Booking (Yellow Hold)</li>
-                    </ul>
 
                     <div class="nav-category">Billing & Passes</div>
                     <li class="nav-item" onclick="switchView('billingView', this)">
                         <span>💳</span> Subscriptions & Receipts
                     </li>
-                    <ul class="sub-menu">
-                        <li onclick="switchView('billingView', this)">• Monthly Auto-Pay</li>
-                        <li onclick="switchView('billingView', this)">• Download E-Receipts</li>
-                    </ul>
 
                     <div class="nav-category">Society Services</div>
                     <li class="nav-item" onclick="switchView('carwashView', this)">
-                        <span>🧼</span> Car Washing Booking
+                        <span>🧼</span> Car Wash Booking
                     </li>
                     <li class="nav-item" onclick="switchView('analyticsView', this)">
                         <span>📈</span> Peak Hour Analytics
@@ -298,7 +281,7 @@
                 
                 <!-- TOP HEADER -->
                 <div class="top-header">
-                    <h3 id="currentViewTitle" style="margin:0; color:#38bdf8;">Overview Dashboard</h3>
+                    <h3 id="currentViewTitle" style="margin:0; color:#38bdf8;">Overview & Live Map</h3>
                     <div class="user-profile">
                         <span id="activeUserDisplay" style="font-size: 14px; font-weight: 600;">Flat: A-302</span>
                         <button class="btn" style="width: auto; padding: 6px 12px; margin: 0;" onclick="toggleTheme()">🌓 Theme</button>
@@ -308,45 +291,104 @@
 
                 <!-- BODY CONTENT VIEWS -->
                 <div class="content-body">
+
+                    <!-- LIVE PARKING FULL WARNING BANNER -->
+                    <div id="fullAlertBanner">
+                        ⚠️ PARKING FULL: All parking slots are currently occupied or reserved!
+                    </div>
                     
-                    <!-- VIEW 1: OVERVIEW DASHBOARD -->
+                    <!-- VIEW 1: OVERVIEW & VISUAL 2D MAP -->
                     <div id="dashboardView" class="view-panel active">
+                        
                         <div class="grid-3">
                             <div class="card">
                                 <h4>Available Spaces</h4>
                                 <h1 style="font-size: 42px; color: #22c55e; margin: 10px 0;" id="dashAvail">3 / 3</h1>
-                                <p style="font-size: 12px; color: var(--text-sub);">Connected to ESP32 local network</p>
+                                <p style="font-size: 12px; color: var(--text-sub);">ESP32 Sensor Live Telemetry</p>
                             </div>
                             <div class="card">
-                                <h4>Subscription Status</h4>
+                                <h4>Pass Status</h4>
                                 <h2 style="color: #ef4444; margin: 15px 0;" id="dashSub">INACTIVE</h2>
                                 <button class="btn" style="background: var(--accent-green);" onclick="switchView('billingView', null)">Renew Monthly Pass</button>
                             </div>
                             <div class="card">
                                 <h4>Quick Pre-Book</h4>
-                                <p style="font-size: 12px; color: var(--text-sub);">Hold a spot prior to arrival home</p>
-                                <button class="btn" style="background: var(--accent-yellow);" onclick="switchView('parkingView', null)">Reserve Slot Now</button>
+                                <p style="font-size: 12px; color: var(--text-sub);">Reserve yellow slot prior to arrival</p>
+                                <button class="btn" id="quickBookBtn" style="background: var(--accent-yellow);" onclick="switchView('parkingView', null)">Reserve Slot Now</button>
                             </div>
                         </div>
+
+                        <!-- VISUAL 2D FLOOR MAP -->
+                        <div class="card">
+                            <h3>Live Floor Parking Layout Map</h3>
+                            <p style="font-size: 12px; color: var(--text-sub);">Real-time visual map synced with ESP32 IR sensors in Shree Pant Nagari premises</p>
+
+                            <div class="parking-map-container">
+                                <div class="map-header">
+                                    <span style="font-size: 12px; font-weight: bold; color: #38bdf8;">GROUND FLOOR - PARKING BAY A</span>
+                                    <span style="font-size: 11px; color: var(--text-sub);">[ ESP32 EDGE GATE CONTROL ACTIVE ]</span>
+                                </div>
+
+                                <div class="driveway-lane">
+                                    ⬆️ MAIN DRIVEWAY LANE / VEHICLE ENTRY GUEST PATH ⬇️
+                                </div>
+
+                                <div class="map-slots-grid">
+                                    <!-- MAP SLOT 1 -->
+                                    <div id="mapBox1" class="map-slot-box slot-free">
+                                        <div class="slot-name">SLOT 01</div>
+                                        <div id="mapIcon1" class="car-icon">🟢</div>
+                                        <div id="mapPill1" class="status-pill">VACANT</div>
+                                    </div>
+
+                                    <!-- MAP SLOT 2 -->
+                                    <div id="mapBox2" class="map-slot-box slot-free">
+                                        <div class="slot-name">SLOT 02</div>
+                                        <div id="mapIcon2" class="car-icon">🟢</div>
+                                        <div id="mapPill2" class="status-pill">VACANT</div>
+                                    </div>
+
+                                    <!-- MAP SLOT 3 -->
+                                    <div id="mapBox3" class="map-slot-box slot-free">
+                                        <div class="slot-name">SLOT 03</div>
+                                        <div id="mapIcon3" class="car-icon">🟢</div>
+                                        <div id="mapPill3" class="status-pill">VACANT</div>
+                                    </div>
+                                </div>
+
+                                <div class="map-legend">
+                                    <div class="legend-item"><div class="legend-dot" style="background:#22c55e;"></div> Vacant</div>
+                                    <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div> Occupied</div>
+                                    <div class="legend-item"><div class="legend-dot" style="background:#eab308;"></div> Pre-Booked (Hold)</div>
+                                </div>
+                            </div>
+
+                            <!-- HARDWARE SENSOR SIMULATION CONTROLS -->
+                            <div style="background: rgba(30, 41, 59, 0.5); padding: 15px; border-radius: 8px; border: 1px dashed var(--border-color);">
+                                <h5 style="margin: 0 0 10px 0; color: #38bdf8;">🧪 Live Sensor Hardware Simulation Controls (For Project Demo)</h5>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn" style="margin:0; background:#334155; font-size:12px;" onclick="toggleSensor(1)">Toggle IR Sensor 1</button>
+                                    <button class="btn" style="margin:0; background:#334155; font-size:12px;" onclick="toggleSensor(2)">Toggle IR Sensor 2</button>
+                                    <button class="btn" style="margin:0; background:#334155; font-size:12px;" onclick="toggleSensor(3)">Toggle IR Sensor 3</button>
+                                </div>
+                            </div>
+
+                        </div>
+
                     </div>
 
                     <!-- VIEW 2: PARKING & PRE-BOOKING -->
                     <div id="parkingView" class="view-panel">
                         <div class="card">
-                            <h3>Live Parking Slots (ESP32 Sensor Sync)</h3>
-                            <div class="slots-container">
-                                <div id="slot1" class="slot free">Slot 1<br><span id="txt1">FREE</span></div>
-                                <div id="slot2" class="slot free">Slot 2<br><span id="txt2">FREE</span></div>
-                                <div id="slot3" class="slot free">Slot 3<br><span id="txt3">FREE</span></div>
-                            </div>
+                            <h3>Pre-Booking System (15-20 Min Yellow Hold)</h3>
+                            <p style="font-size: 12px; color: var(--text-sub);">Select a vacant slot to hold before driving into society compound</p>
                             
-                            <h4>Pre-Booking System (15-20 Min Yellow Hold)</h4>
                             <select id="slotSelect">
                                 <option value="1">Reserve Slot 1</option>
                                 <option value="2">Reserve Slot 2</option>
                                 <option value="3">Reserve Slot 3</option>
                             </select>
-                            <button class="btn" style="background: var(--accent-yellow);" onclick="triggerPreBook()">📌 Pre-Book Selected Slot</button>
+                            <button class="btn" id="prebookActionBtn" style="background: var(--accent-yellow);" onclick="triggerPreBook()">📌 Pre-Book Selected Slot</button>
                         </div>
                     </div>
 
@@ -428,10 +470,10 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT ARCHITECTURE -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
         let currentResident = null;
-        let slots = ["free", "free", "free"];
+        let slots = ["free", "free", "free"]; // State tracking: "free", "occupied", "reserved"
         let payAmount = 0;
 
         // LOGIN HANDLER
@@ -444,6 +486,7 @@
                 document.getElementById("loginScreen").style.display = "none";
                 document.getElementById("appContainer").style.display = "block";
                 initAnalyticsChart();
+                updateMapDisplay();
             }
         }
 
@@ -452,7 +495,7 @@
             document.getElementById("loginScreen").style.display = "flex";
         }
 
-        // NAVIGATION VIEW SWITCHING
+        // VIEW SWITCHING
         function switchView(viewId, element) {
             document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
@@ -462,15 +505,70 @@
                 element.classList.add('active');
             }
 
-            // Update Header Title
             let titles = {
-                'dashboardView': 'Overview Dashboard',
-                'parkingView': 'Live Slots & Gate Control',
+                'dashboardView': 'Overview & Live Map',
+                'parkingView': 'Slot Pre-Booking System',
                 'billingView': 'Subscriptions & E-Receipts',
                 'carwashView': 'Society Car Wash Service',
                 'analyticsView': 'Peak Hour Occupancy Analytics'
             };
             document.getElementById("currentViewTitle").innerText = titles[viewId];
+        }
+
+        // UPDATE MAP LAYOUT & CHECK FULL PARKING CONDITION
+        function updateMapDisplay() {
+            let vacantCount = 0;
+
+            for (let i = 0; i < 3; i++) {
+                let slotNum = i + 1;
+                let box = document.getElementById("mapBox" + slotNum);
+                let icon = document.getElementById("mapIcon" + slotNum);
+                let pill = document.getElementById("mapPill" + slotNum);
+
+                if (slots[i] === "free") {
+                    box.className = "map-slot-box slot-free";
+                    icon.innerText = "🟢";
+                    pill.innerText = "VACANT";
+                    vacantCount++;
+                } else if (slots[i] === "occupied") {
+                    box.className = "map-slot-box slot-occupied";
+                    icon.innerText = "🚘";
+                    pill.innerText = "OCCUPIED";
+                } else if (slots[i] === "reserved") {
+                    box.className = "map-slot-box slot-reserved";
+                    icon.innerText = "🟡";
+                    pill.innerText = "PRE-BOOKED";
+                }
+            }
+
+            // Update Count
+            document.getElementById("dashAvail").innerText = vacantCount + " / 3";
+
+            // CHECK IF PARKING IS FULL
+            let fullBanner = document.getElementById("fullAlertBanner");
+            let quickBtn = document.getElementById("quickBookBtn");
+            let actionBtn = document.getElementById("prebookActionBtn");
+
+            if (vacantCount === 0) {
+                fullBanner.style.display = "block";
+                if (quickBtn) quickBtn.disabled = true;
+                if (actionBtn) actionBtn.disabled = true;
+            } else {
+                fullBanner.style.display = "none";
+                if (quickBtn) quickBtn.disabled = false;
+                if (actionBtn) actionBtn.disabled = false;
+            }
+        }
+
+        // SIMULATE IR SENSOR TOGGLE
+        function toggleSensor(slotNum) {
+            let idx = slotNum - 1;
+            slots[idx] = (slots[idx] === "occupied") ? "free" : "occupied";
+            updateMapDisplay();
+            
+            if (slots.filter(s => s === "free").length === 0) {
+                alert("🚨 ALL PARKING SLOTS ARE NOW OCCUPIED! 'PARKING FULL' ALERT ACTIVATED.");
+            }
         }
 
         // PRE-BOOKING LOGIC
@@ -480,17 +578,14 @@
 
             if (slots[idx] === "free") {
                 slots[idx] = "reserved";
-                let elem = document.getElementById("slot" + slotNum);
-                let txt = document.getElementById("txt" + slotNum);
-                elem.className = "slot reserved";
-                txt.innerText = "HOLD";
+                updateMapDisplay();
                 alert("Slot " + slotNum + " reserved with yellow indicator light!");
             } else {
-                alert("Slot is unavailable for pre-booking.");
+                alert("Slot " + slotNum + " is currently occupied or already reserved.");
             }
         }
 
-        // PAYMENT & RECEIPT
+        // PAYMENTS & RECEIPTS
         function openPayModal(title, amt) {
             payAmount = amt;
             document.getElementById("payModalTitle").innerText = title;
@@ -518,13 +613,8 @@
             html2pdf().from(elem).save('ParkEZ_Receipt.pdf');
         }
 
-        function bookWashService() {
-            openPayModal("Car Wash Service", 200);
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle("light-theme");
-        }
+        function bookWashService() { openPayModal("Car Wash Service", 200); }
+        function toggleTheme() { document.body.classList.toggle("light-theme"); }
 
         // CHART.JS INITIALIZATION
         function initAnalyticsChart() {
