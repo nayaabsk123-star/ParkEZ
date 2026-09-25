@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ParkEZ Portal - Shree Pant Nagari Co-Op Housing Society</title>
+    <title>ParkEZ Enterprise Portal - Shree Pant Nagari Co-Op Housing Society</title>
     <!-- Chart.js for Peak Hour Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- html2pdf for Downloadable Payment Receipts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- QRCode.js for Gate Access Pass Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
             --bg-main: #0b0f19;
@@ -44,7 +46,7 @@
             transition: background-color 0.3s ease;
         }
 
-        /* DEDICATED FULL-SCREEN LOGIN PAGE */
+        /* DEDICATED FULL-SCREEN LOGIN PAGE WITH ROLE SELECTOR */
         #loginScreen {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -60,7 +62,7 @@
             padding: 40px;
             border-radius: 16px;
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
             border: 1px solid #334155;
             text-align: center;
@@ -219,22 +221,42 @@
         .legend-item { display: flex; align-items: center; gap: 6px; }
         .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
 
+        /* EVENT AUDIT LOG CONTAINER */
+        .log-terminal {
+            background: #020617;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            height: 160px;
+            overflow-y: auto;
+            color: #38bdf8;
+        }
+
         /* MODALS */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: var(--bg-card); padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid var(--border-color); }
+        .modal-content { background: var(--bg-card); padding: 30px; border-radius: 12px; width: 90%; max-width: 420px; border: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
 
-    <!-- 1. FULL SCREEN DEDICATED LOGIN PAGE -->
+    <!-- 1. FULL SCREEN LOGIN WITH ROLE SELECTOR -->
     <div id="loginScreen">
         <div class="login-box">
-            <h2>ParkEZ Portal</h2>
+            <h2>ParkEZ Ecosystem</h2>
             <p>Shree Pant Nagari Co-Op Housing Society Ltd.</p>
             <form onsubmit="handleLogin(event)">
+                <label style="font-size: 12px; color: var(--text-sub); display: block; text-align: left;">Portal User Role</label>
+                <select id="userRole" onchange="toggleRoleInput(this.value)">
+                    <option value="resident">Resident Portal</option>
+                    <option value="security">Gate Security Guard / Admin</option>
+                </select>
+
                 <input type="text" id="userFlat" placeholder="Flat / Unit No. (e.g. A-302)" required>
-                <input type="password" id="userPass" placeholder="Resident Security PIN" required>
-                <button type="submit" class="btn" style="background: var(--accent-blue);">Login to Resident Portal</button>
+                <input type="password" id="userPass" placeholder="Security Access PIN" required>
+                
+                <button type="submit" class="btn" style="background: var(--accent-blue);">Login to Portal</button>
             </form>
         </div>
     </div>
@@ -246,7 +268,7 @@
             <!-- SIDEBAR -->
             <div class="sidebar">
                 <div class="sidebar-brand">
-                    <h2>ParkEZ Ecosystem</h2>
+                    <h2>ParkEZ Portal</h2>
                     <span>Shree Pant Nagari Society</span>
                 </div>
 
@@ -256,19 +278,25 @@
                         <span>📊</span> Overview & Live Map
                     </li>
                     
-                    <div class="nav-category">Parking Operations</div>
-                    <li class="nav-item" onclick="switchView('parkingView', this)">
-                        <span>🚗</span> Slot Pre-Booking
+                    <div class="nav-category">Resident Operations</div>
+                    <li class="nav-item" id="navPrebook" onclick="switchView('parkingView', this)">
+                        <span>🚗</span> Slot Pre-Booking & Pass
+                    </li>
+                    <li class="nav-item" id="navVisitor" onclick="switchView('visitorView', this)">
+                        <span>🏷️</span> Visitor Registration
                     </li>
 
                     <div class="nav-category">Billing & Passes</div>
-                    <li class="nav-item" onclick="switchView('billingView', this)">
+                    <li class="nav-item" id="navBilling" onclick="switchView('billingView', this)">
                         <span>💳</span> Subscriptions & Receipts
                     </li>
 
-                    <div class="nav-category">Society Services</div>
+                    <div class="nav-category">Administration & Gate</div>
+                    <li class="nav-item" id="navSecurity" onclick="switchView('securityView', this)">
+                        <span>🛡️</span> Security Gate Control
+                    </li>
                     <li class="nav-item" onclick="switchView('carwashView', this)">
-                        <span>🧼</span> Car Wash Booking
+                        <span>🧼</span> Society Services
                     </li>
                     <li class="nav-item" onclick="switchView('analyticsView', this)">
                         <span>📈</span> Peak Hour Analytics
@@ -283,6 +311,7 @@
                 <div class="top-header">
                     <h3 id="currentViewTitle" style="margin:0; color:#38bdf8;">Overview & Live Map</h3>
                     <div class="user-profile">
+                        <span id="activeRoleBadge" style="background: #0284c7; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold;">RESIDENT</span>
                         <span id="activeUserDisplay" style="font-size: 14px; font-weight: 600;">Flat: A-302</span>
                         <button class="btn" style="width: auto; padding: 6px 12px; margin: 0;" onclick="toggleTheme()">🌓 Theme</button>
                         <button class="btn" style="width: auto; padding: 6px 12px; margin: 0; background: #dc2626;" onclick="handleLogout()">Logout</button>
@@ -363,13 +392,23 @@
                                 </div>
                             </div>
 
-                            <!-- HARDWARE SENSOR SIMULATION CONTROLS -->
-                            <div style="background: rgba(30, 41, 59, 0.5); padding: 15px; border-radius: 8px; border: 1px dashed var(--border-color);">
-                                <h5 style="margin: 0 0 10px 0; color: #38bdf8;">🧪 Live Sensor Hardware Simulation Controls (For Project Demo)</h5>
-                                <div style="display: flex; gap: 10px;">
-                                    <button class="btn" style="margin:0; background:#334155; font-size:12px;" onclick="toggleSensor(1)">Toggle IR Sensor 1</button>
-                                    <button class="btn" style="margin:0; background:#334155; font-size:12px;" onclick="toggleSensor(2)">Toggle IR Sensor 2</button>
-                                    <button class="btn" style="margin:0; background:#334155; font-size:12px;" onclick="toggleSensor(3)">Toggle IR Sensor 3</button>
+                            <!-- AUDIT LOG & HARDWARE SIMULATION -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                                <div>
+                                    <h5 style="margin: 0 0 8px 0; color: #38bdf8;">📜 Real-Time System Activity Log</h5>
+                                    <div id="systemLog" class="log-terminal">
+                                        [00:00:00] System Initialized.<br>
+                                        [00:00:00] ESP32 Gateway Connected.<br>
+                                    </div>
+                                </div>
+
+                                <div style="background: rgba(30, 41, 59, 0.5); padding: 15px; border-radius: 8px; border: 1px dashed var(--border-color);">
+                                    <h5 style="margin: 0 0 10px 0; color: #38bdf8;">🧪 Live IR Sensor Hardware Controls</h5>
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <button class="btn" style="margin:0; background:#334155; font-size:12px;" onclick="toggleSensor(1)">Toggle IR Sensor 1</button>
+                                        <button class="btn" style="margin:0; background:#334155; font-size:12px;" onclick="toggleSensor(2)">Toggle IR Sensor 2</button>
+                                        <button class="btn" style="margin:0; background:#334155; font-size:12px;" onclick="toggleSensor(3)">Toggle IR Sensor 3</button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -377,22 +416,43 @@
 
                     </div>
 
-                    <!-- VIEW 2: PARKING & PRE-BOOKING -->
+                    <!-- VIEW 2: PARKING & PRE-BOOKING WITH QR PASS -->
                     <div id="parkingView" class="view-panel">
-                        <div class="card">
-                            <h3>Pre-Booking System (15-20 Min Yellow Hold)</h3>
-                            <p style="font-size: 12px; color: var(--text-sub);">Select a vacant slot to hold before driving into society compound</p>
-                            
-                            <select id="slotSelect">
-                                <option value="1">Reserve Slot 1</option>
-                                <option value="2">Reserve Slot 2</option>
-                                <option value="3">Reserve Slot 3</option>
-                            </select>
-                            <button class="btn" id="prebookActionBtn" style="background: var(--accent-yellow);" onclick="triggerPreBook()">📌 Pre-Book Selected Slot</button>
+                        <div class="grid-3">
+                            <div class="card">
+                                <h3>Pre-Booking System</h3>
+                                <p style="font-size: 12px; color: var(--text-sub);">Select a vacant slot to hold before driving into society compound</p>
+                                
+                                <select id="slotSelect">
+                                    <option value="1">Reserve Slot 1</option>
+                                    <option value="2">Reserve Slot 2</option>
+                                    <option value="3">Reserve Slot 3</option>
+                                </select>
+                                <button class="btn" id="prebookActionBtn" style="background: var(--accent-yellow);" onclick="triggerPreBook()">📌 Pre-Book Selected Slot</button>
+                            </div>
+
+                            <div class="card" style="text-align: center;">
+                                <h3>Digital Gate Pass QR</h3>
+                                <p style="font-size: 12px; color: var(--text-sub);">Scan QR at compound gate for automated barrier opening</p>
+                                <div id="qrcode" style="display: flex; justify-content: center; margin: 15px 0;"></div>
+                                <span id="qrPassCode" style="font-weight: bold; font-family: monospace; color: #38bdf8;">NO ACTIVE RESERVATION</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- VIEW 3: BILLING & RECEIPTS -->
+                    <!-- VIEW 3: VISITOR REGISTRATION -->
+                    <div id="visitorView" class="view-panel">
+                        <div class="card" style="max-width: 500px;">
+                            <h3>Register Upcoming Guest Vehicle</h3>
+                            <p style="font-size: 12px; color: var(--text-sub);">Pre-authorizes guest vehicles to bypass manual security questioning</p>
+                            
+                            <input type="text" id="visitorName" placeholder="Guest Name">
+                            <input type="text" id="visitorPlate" placeholder="Vehicle Number (e.g., MH-04-AB-1234)">
+                            <button class="btn" style="background: var(--accent-blue);" onclick="registerVisitor()">Register Visitor Vehicle</button>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 4: BILLING & RECEIPTS -->
                     <div id="billingView" class="view-panel">
                         <div class="grid-3">
                             <div class="card">
@@ -411,7 +471,30 @@
                         </div>
                     </div>
 
-                    <!-- VIEW 4: CAR WASH SERVICE -->
+                    <!-- VIEW 5: SECURITY GUARD GATE DASHBOARD -->
+                    <div id="securityView" class="view-panel">
+                        <div class="grid-3">
+                            <div class="card">
+                                <h3>Gate Barrier SG90 Servo Control</h3>
+                                <p style="font-size: 12px; color: var(--text-sub);">Manual override controls for compound entrance gate</p>
+                                <div id="gateStatusDisplay" style="font-size: 20px; font-weight: bold; color: #ef4444; margin: 15px 0;">
+                                    GATE STATUS: CLOSED 🔴
+                                </div>
+                                <button class="btn" style="background: var(--accent-green);" onclick="triggerGate('OPEN')">🟢 Manual Open Gate</button>
+                                <button class="btn" style="background: var(--accent-red);" onclick="triggerGate('CLOSED')">🔴 Emergency Lock Gate</button>
+                            </div>
+
+                            <div class="card">
+                                <h3>Log Guest Vehicle</h3>
+                                <p style="font-size: 12px; color: var(--text-sub);">Manual entry log for non-registered visitors</p>
+                                <input type="text" id="secPlate" placeholder="Vehicle Number">
+                                <input type="text" id="secFlat" placeholder="Flat To Visit">
+                                <button class="btn" style="background: var(--accent-purple);" onclick="logGuardEntry()">Log Vehicle Entry</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 6: CAR WASH SERVICE -->
                     <div id="carwashView" class="view-panel">
                         <div class="card" style="max-width: 500px;">
                             <h3>Book Society Car Wash</h3>
@@ -424,7 +507,7 @@
                         </div>
                     </div>
 
-                    <!-- VIEW 5: PEAK HOUR ANALYTICS -->
+                    <!-- VIEW 7: PEAK HOUR ANALYTICS -->
                     <div id="analyticsView" class="view-panel">
                         <div class="card">
                             <h3>Evening Peak Hour Occupancy Tracker</h3>
@@ -472,21 +555,53 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
+        let currentRole = "resident";
         let currentResident = null;
         let slots = ["free", "free", "free"]; // State tracking: "free", "occupied", "reserved"
         let payAmount = 0;
+        let qrcodeObj = null;
+
+        function toggleRoleInput(role) {
+            let input = document.getElementById("userFlat");
+            if (role === "security") {
+                input.value = "GATE-GUARD-01";
+                input.readOnly = true;
+            } else {
+                input.value = "";
+                input.placeholder = "Flat / Unit No. (e.g. A-302)";
+                input.readOnly = false;
+            }
+        }
 
         // LOGIN HANDLER
         function handleLogin(e) {
             e.preventDefault();
+            currentRole = document.getElementById("userRole").value;
             let flat = document.getElementById("userFlat").value;
+
             if (flat) {
                 currentResident = flat;
-                document.getElementById("activeUserDisplay").innerText = "Flat: " + currentResident;
+                document.getElementById("activeUserDisplay").innerText = (currentRole === "security") ? "Gate Guard ID: 01" : "Flat: " + currentResident;
+                document.getElementById("activeRoleBadge").innerText = currentRole.toUpperCase();
                 document.getElementById("loginScreen").style.display = "none";
                 document.getElementById("appContainer").style.display = "block";
+
+                // Role Based Interface Visibility
+                if (currentRole === "security") {
+                    document.getElementById("navPrebook").style.display = "none";
+                    document.getElementById("navVisitor").style.display = "none";
+                    document.getElementById("navBilling").style.display = "none";
+                    document.getElementById("navSecurity").style.display = "flex";
+                } else {
+                    document.getElementById("navPrebook").style.display = "flex";
+                    document.getElementById("navVisitor").style.display = "flex";
+                    document.getElementById("navBilling").style.display = "flex";
+                    document.getElementById("navSecurity").style.display = "none";
+                }
+
                 initAnalyticsChart();
                 updateMapDisplay();
+                appendLog("User logged in as " + currentRole.toUpperCase() + " (" + currentResident + ")");
             }
         }
 
@@ -507,12 +622,21 @@
 
             let titles = {
                 'dashboardView': 'Overview & Live Map',
-                'parkingView': 'Slot Pre-Booking System',
+                'parkingView': 'Slot Pre-Booking & Access Pass',
+                'visitorView': 'Visitor & Guest Vehicle Registration',
                 'billingView': 'Subscriptions & E-Receipts',
+                'securityView': 'Security Guard Gate Control Dashboard',
                 'carwashView': 'Society Car Wash Service',
                 'analyticsView': 'Peak Hour Occupancy Analytics'
             };
             document.getElementById("currentViewTitle").innerText = titles[viewId];
+        }
+
+        // AUDIT LOG SYSTEM
+        function appendLog(msg) {
+            let logBox = document.getElementById("systemLog");
+            let timeStr = new Date().toLocaleTimeString();
+            logBox.innerHTML = `[${timeStr}] ${msg}<br>` + logBox.innerHTML;
         }
 
         // UPDATE MAP LAYOUT & CHECK FULL PARKING CONDITION
@@ -565,13 +689,15 @@
             let idx = slotNum - 1;
             slots[idx] = (slots[idx] === "occupied") ? "free" : "occupied";
             updateMapDisplay();
+            appendLog(`IR Sensor ${slotNum} state changed to: ${slots[idx].toUpperCase()}`);
             
             if (slots.filter(s => s === "free").length === 0) {
                 alert("🚨 ALL PARKING SLOTS ARE NOW OCCUPIED! 'PARKING FULL' ALERT ACTIVATED.");
+                appendLog("⚠️ CRITICAL ALERT: Parking Full triggered.");
             }
         }
 
-        // PRE-BOOKING LOGIC
+        // PRE-BOOKING LOGIC WITH QR PASS
         function triggerPreBook() {
             let slotNum = document.getElementById("slotSelect").value;
             let idx = slotNum - 1;
@@ -579,9 +705,53 @@
             if (slots[idx] === "free") {
                 slots[idx] = "reserved";
                 updateMapDisplay();
-                alert("Slot " + slotNum + " reserved with yellow indicator light!");
+                let passCode = "PASS-" + currentResident + "-SLOT0" + slotNum;
+                document.getElementById("qrPassCode").innerText = passCode;
+                
+                document.getElementById("qrcode").innerHTML = "";
+                qrcodeObj = new QRCode(document.getElementById("qrcode"), { text: passCode, width: 128, height: 128 });
+
+                appendLog(`Slot ${slotNum} Pre-Booked by ${currentResident}. Pass generated: ${passCode}`);
+                alert("Slot " + slotNum + " reserved! QR Pass generated on screen.");
             } else {
                 alert("Slot " + slotNum + " is currently occupied or already reserved.");
+            }
+        }
+
+        // VISITOR REGISTRATION
+        function registerVisitor() {
+            let name = document.getElementById("visitorName").value;
+            let plate = document.getElementById("visitorPlate").value;
+            if (name && plate) {
+                appendLog(`Guest Pre-Registered: ${name} (${plate}) for Flat ${currentResident}`);
+                alert(`Guest vehicle ${plate} registered successfully! Gate guard will auto-approve.`);
+                document.getElementById("visitorName").value = "";
+                document.getElementById("visitorPlate").value = "";
+            }
+        }
+
+        // GATE CONTROL LOGIC
+        function triggerGate(state) {
+            let badge = document.getElementById("gateStatusDisplay");
+            if (state === "OPEN") {
+                badge.innerHTML = "GATE STATUS: OPEN 🟢 (SG90 Servo Actuated)";
+                badge.style.color = "#22c55e";
+                appendLog("Gate Barrier opened manually by Guard.");
+            } else {
+                badge.innerHTML = "GATE STATUS: CLOSED 🔴";
+                badge.style.color = "#ef4444";
+                appendLog("Gate Barrier locked by Guard.");
+            }
+        }
+
+        function logGuardEntry() {
+            let plate = document.getElementById("secPlate").value;
+            let flat = document.getElementById("secFlat").value;
+            if (plate && flat) {
+                appendLog(`Manual Guard Log: Vehicle ${plate} entered for Flat ${flat}`);
+                alert(`Entry logged for ${plate}`);
+                document.getElementById("secPlate").value = "";
+                document.getElementById("secFlat").value = "";
             }
         }
 
@@ -597,6 +767,7 @@
             closeModal('payModal');
             document.getElementById("dashSub").innerText = "ACTIVE";
             document.getElementById("dashSub").style.color = "#22c55e";
+            appendLog(`Payment completed: ₹${payAmount} via UPI`);
             alert("Payment of ₹" + payAmount + " successful!");
         }
 
