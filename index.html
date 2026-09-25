@@ -234,6 +234,23 @@
             color: #38bdf8;
         }
 
+        /* TABLE STYLING FOR GUARD APPROVALS */
+        .visitor-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        .visitor-table th, .visitor-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .visitor-table th {
+            background-color: rgba(15, 23, 42, 0.8);
+            color: #38bdf8;
+        }
+
         /* MODALS */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 2000; }
         .modal-content { background: var(--bg-card); padding: 30px; border-radius: 12px; width: 90%; max-width: 420px; border: 1px solid var(--border-color); }
@@ -444,7 +461,7 @@
                     <div id="visitorView" class="view-panel">
                         <div class="card" style="max-width: 500px;">
                             <h3>Register Upcoming Guest Vehicle</h3>
-                            <p style="font-size: 12px; color: var(--text-sub);">Pre-authorizes guest vehicles to bypass manual security questioning</p>
+                            <p style="font-size: 12px; color: var(--text-sub);">Pre-authorizes guest vehicles so security guard can approve entrance at gate</p>
                             
                             <input type="text" id="visitorName" placeholder="Guest Name">
                             <input type="text" id="visitorPlate" placeholder="Vehicle Number (e.g., MH-04-AB-1234)">
@@ -485,11 +502,33 @@
                             </div>
 
                             <div class="card">
-                                <h3>Log Guest Vehicle</h3>
+                                <h3>Log Unregistered Guest Vehicle</h3>
                                 <p style="font-size: 12px; color: var(--text-sub);">Manual entry log for non-registered visitors</p>
                                 <input type="text" id="secPlate" placeholder="Vehicle Number">
                                 <input type="text" id="secFlat" placeholder="Flat To Visit">
                                 <button class="btn" style="background: var(--accent-purple);" onclick="logGuardEntry()">Log Vehicle Entry</button>
+                            </div>
+                        </div>
+
+                        <!-- GUARD VISITOR APPROVAL PANEL -->
+                        <div class="card">
+                            <h3>Pre-Approved Visitor Approvals</h3>
+                            <p style="font-size: 12px; color: var(--text-sub);">Visitors pre-registered by residents waiting for gate clearance</p>
+                            <div style="overflow-x: auto;">
+                                <table class="visitor-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Guest Name</th>
+                                            <th>Vehicle Number</th>
+                                            <th>Host Flat</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="guardVisitorTableBody">
+                                        <!-- Dynamic visitor approvals injected here -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -561,6 +600,11 @@
         let payAmount = 0;
         let qrcodeObj = null;
 
+        // Visitor dataset to store pre-registered visitors
+        let registeredVisitors = [
+            { id: 1, name: "Rahul Sharma", plate: "MH-04-AB-1234", flat: "A-302", status: "PENDING" }
+        ];
+
         function toggleRoleInput(role) {
             let input = document.getElementById("userFlat");
             if (role === "security") {
@@ -592,6 +636,7 @@
                     document.getElementById("navVisitor").style.display = "none";
                     document.getElementById("navBilling").style.display = "none";
                     document.getElementById("navSecurity").style.display = "flex";
+                    renderGuardVisitorTable();
                 } else {
                     document.getElementById("navPrebook").style.display = "flex";
                     document.getElementById("navVisitor").style.display = "flex";
@@ -618,6 +663,10 @@
             if (element) {
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
                 element.classList.add('active');
+            }
+
+            if (viewId === 'securityView') {
+                renderGuardVisitorTable();
             }
 
             let titles = {
@@ -720,13 +769,67 @@
 
         // VISITOR REGISTRATION
         function registerVisitor() {
-            let name = document.getElementById("visitorName").value;
-            let plate = document.getElementById("visitorPlate").value;
+            let name = document.getElementById("visitorName").value.trim();
+            let plate = document.getElementById("visitorPlate").value.trim();
             if (name && plate) {
+                registeredVisitors.push({
+                    id: Date.now(),
+                    name: name,
+                    plate: plate,
+                    flat: currentResident || "A-302",
+                    status: "PENDING"
+                });
                 appendLog(`Guest Pre-Registered: ${name} (${plate}) for Flat ${currentResident}`);
-                alert(`Guest vehicle ${plate} registered successfully! Gate guard will auto-approve.`);
+                alert(`Guest vehicle ${plate} registered successfully! The gate guard can now approve entry.`);
                 document.getElementById("visitorName").value = "";
                 document.getElementById("visitorPlate").value = "";
+            } else {
+                alert("Please fill in both the guest name and vehicle number.");
+            }
+        }
+
+        // GUARD VISITOR TABLE RENDER & APPROVAL LOGIC
+        function renderGuardVisitorTable() {
+            let tbody = document.getElementById("guardVisitorTableBody");
+            if (!tbody) return;
+
+            tbody.innerHTML = "";
+
+            if (registeredVisitors.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-sub);">No pre-registered visitors found.</td></tr>`;
+                return;
+            }
+
+            registeredVisitors.forEach(v => {
+                let statusBadge = v.status === "APPROVED" 
+                    ? `<span style="color: #22c55e; font-weight: bold;">APPROVED 🟢</span>`
+                    : `<span style="color: #eab308; font-weight: bold;">PENDING 🟡</span>`;
+
+                let actionButton = v.status === "PENDING"
+                    ? `<button class="btn" style="margin:0; padding:6px 12px; font-size:12px; background:var(--accent-green);" onclick="approveVisitorByGuard(${v.id})">🟢 Approve & Open Gate</button>`
+                    : `<button class="btn" style="margin:0; padding:6px 12px; font-size:12px; background:#475569;" disabled>Entry Cleared</button>`;
+
+                let row = `
+                    <tr>
+                        <td><strong>${v.name}</strong></td>
+                        <td>${v.plate}</td>
+                        <td>${v.flat}</td>
+                        <td>${statusBadge}</td>
+                        <td>${actionButton}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function approveVisitorByGuard(visitorId) {
+            let visitor = registeredVisitors.find(v => v.id === visitorId);
+            if (visitor) {
+                visitor.status = "APPROVED";
+                triggerGate('OPEN');
+                appendLog(`Visitor Approved by Guard: ${visitor.name} (${visitor.plate}) for Flat ${visitor.flat}`);
+                alert(`Entry Approved for ${visitor.name} (${visitor.plate})! Barrier Gate Opened.`);
+                renderGuardVisitorTable();
             }
         }
 
@@ -736,7 +839,7 @@
             if (state === "OPEN") {
                 badge.innerHTML = "GATE STATUS: OPEN 🟢 (SG90 Servo Actuated)";
                 badge.style.color = "#22c55e";
-                appendLog("Gate Barrier opened manually by Guard.");
+                appendLog("Gate Barrier opened by Guard.");
             } else {
                 badge.innerHTML = "GATE STATUS: CLOSED 🔴";
                 badge.style.color = "#ef4444";
