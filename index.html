@@ -910,5 +910,40 @@
             });
         }
     </script>
+    <script>
+  const API_URL = "http://127.0.0.1:8000";
+
+  // Fetch slot status from backend every 2 seconds
+  async function fetchStatus() {
+    try {
+      const res = await fetch(`${API_URL}/api/status`);
+      const data = await res.json();
+      console.log("Current System State:", data);
+      
+      // Update your UI elements here based on data.slots
+    } catch (err) {
+      console.error("Backend offline:", err);
+    }
+  }
+
+  // Call this function when a pre-book button is clicked
+  async function bookSlot(slotId) {
+    try {
+      const res = await fetch(`${API_URL}/api/prebook`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slot_id: String(slotId) })
+      });
+      const data = await res.json();
+      alert(data.message || data.detail);
+      fetchStatus();
+    } catch (err) {
+      alert("Error reaching backend");
+    }
+  }
+
+  // Poll state automatically every 2 seconds
+  setInterval(fetchStatus, 2000);
+</script>
 </body>
 </html>
