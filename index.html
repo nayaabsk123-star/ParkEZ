@@ -10,31 +10,48 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- QRCode.js for Gate Access Pass Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        },
+                        darkbg: '#0b1120',
+                        darkcard: '#1e293b',
+                        darkborder: '#334155'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         :root {
-            --bg-main: #04434a;
-            --bg-card: #151c2c;
-            --bg-sidebar: #111827;
-            --border-color: #1f293d;
-            --text-main: #f3f4f6;
-            --text-sub: #9ca3af;
-            --accent-blue: #0251c7;
-            --accent-green: #267646;
-            --accent-yellow: #ca8a04;
-            --accent-red: #dc2626;
-            --accent-purple: #9333ea;
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-sidebar: #090d16;
+            --border-color: #334155;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
         }
 
         .light-theme {
-            --bg-main: #f1f5f9;
+            --bg-main: #f8fafc;
             --bg-card: #ffffff;
             --bg-sidebar: #0f172a;
-            --border-color: #cbd5e1;
+            --border-color: #e2e8f0;
             --text-main: #0f172a;
             --text-sub: #64748b;
         }
 
-        * { box-sizing: border-box; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-main);
@@ -43,146 +60,57 @@
             padding: 0;
             height: 100vh;
             overflow: hidden;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* DEDICATED FULL-SCREEN LOGIN PAGE WITH ROLE SELECTOR */
-        #loginScreen {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-        .login-box {
-            background: rgba(30, 41, 59, 0.95);
-            padding: 40px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 440px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-            border: 1px solid #334155;
-            text-align: center;
-        }
-
-        .login-box h2 { margin: 0 0 5px 0; color: #38bdf8; font-size: 26px; }
-        .login-box p { color: #94a3b8; font-size: 13px; margin-bottom: 25px; }
-
-        input, select {
-            width: 100%;
-            padding: 12px 15px;
-            margin: 8px 0;
-            border-radius: 8px;
+        /* Modern Styling Elements */
+        .glass-panel {
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            background: rgba(15, 23, 42, 0.6);
-            color: var(--text-main);
-            font-size: 14px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            background: var(--accent-blue);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.2s ease;
-            margin-top: 10px;
-        }
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-
-        /* APP LAYOUT STRUCTURE */
-        #appContainer {
-            display: none;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        .sidebar {
-            width: 260px;
-            background-color: var(--bg-sidebar);
-            height: 100%;
+        .nav-item {
+            padding: 10px 16px;
             display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--border-color);
+            align-items: center;
+            gap: 12px;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            margin: 2px 10px;
+            transition: all 0.2s ease;
+        }
+        .nav-item:hover {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+        }
+        .nav-item.active {
+            background-color: #0284c7;
             color: #ffffff;
+            font-weight: 600;
         }
 
-        .sidebar-brand { padding: 24px 20px; border-bottom: 1px solid #1e293b; }
-        .sidebar-brand h2 { margin: 0; color: #38bdf8; font-size: 20px; }
-        .sidebar-brand span { font-size: 11px; color: #94a3b8; }
-
-        .nav-menu { list-style: none; padding: 15px 0; margin: 0; flex-grow: 1; overflow-y: auto; }
-        .nav-category { padding: 12px 20px 6px 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; }
-        .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 12px; color: #cbd5e1; font-size: 14px; cursor: pointer; transition: all 0.2s; }
-        .nav-item:hover, .nav-item.active { background-color: #1e293b; color: #38bdf8; border-left: 4px solid #38bdf8; }
-
-        .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-        .top-header { height: 65px; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; }
-        .user-profile { display: flex; align-items: center; gap: 15px; }
-
-        .content-body { padding: 30px; overflow-y: auto; flex-grow: 1; }
         .view-panel { display: none; }
         .view-panel.active { display: block; }
 
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
-        .card { background: var(--bg-card); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 20px; }
-
-        /* PARKING FULL ALERT BANNER */
-        #fullAlertBanner {
-            display: none;
-            background: #991b1b;
-            color: #fef2f2;
-            padding: 15px 20px;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 16px;
-            text-align: center;
-            border: 2px solid #ef4444;
-            margin-bottom: 20px;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
-        /* 2D VISUAL PARKING MAP LAYOUT */
+        /* Parking Map Visuals */
         .parking-map-container {
-            background: #090d16;
-            border: 2px dashed #334155;
+            background: #060911;
+            border: 2px dashed var(--border-color);
             border-radius: 12px;
-            padding: 25px;
-            margin: 20px 0;
-            position: relative;
+            padding: 20px;
+            margin: 15px 0;
         }
-
-        .map-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f293d; padding-bottom: 10px; margin-bottom: 20px; }
-        
-        .driveway-lane {
-            background: #1e293b;
-            height: 50px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #64748b;
-            font-size: 12px;
-            letter-spacing: 2px;
-            font-weight: bold;
-            border: 1px dashed #475569;
-            margin-bottom: 20px;
-        }
-
-        .map-slots-grid { display: flex; justify-content: space-around; gap: 15px; }
-
         .map-slot-box {
             flex: 1;
             height: 140px;
@@ -191,462 +119,769 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
+            padding: 12px;
             font-weight: bold;
-            position: relative;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
+        .slot-free { background: rgba(22, 101, 52, 0.25); border: 2px solid #22c55e; color: #4ade80; }
+        .slot-occupied { background: rgba(153, 27, 27, 0.25); border: 2px solid #ef4444; color: #fca5a5; }
+        .slot-reserved { background: rgba(133, 77, 14, 0.25); border: 2px solid #eab308; color: #fef08a; }
 
-        .map-slot-box .car-icon { font-size: 32px; margin-top: 10px; }
-        .map-slot-box .slot-name { font-size: 16px; letter-spacing: 1px; }
-        .map-slot-box .status-pill {
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 12px;
-            text-transform: uppercase;
-        }
-
-        /* Slot Colors */
-        .slot-free { background: rgba(22, 101, 52, 0.3); border: 2px solid #22c55e; color: #4ade80; }
-        .slot-free .status-pill { background: #166534; color: #4ade80; }
-
-        .slot-occupied { background: rgba(153, 27, 27, 0.3); border: 2px solid #ef4444; color: #fca5a5; }
-        .slot-occupied .status-pill { background: #991b1b; color: #fca5a5; }
-
-        .slot-reserved { background: rgba(133, 77, 14, 0.3); border: 2px solid #eab308; color: #fef08a; }
-        .slot-reserved .status-pill { background: #854d0e; color: #fef08a; }
-
-        .map-legend { display: flex; gap: 15px; justify-content: center; margin-top: 15px; font-size: 12px; }
-        .legend-item { display: flex; align-items: center; gap: 6px; }
-        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
-
-        /* EVENT AUDIT LOG CONTAINER */
-        .log-terminal {
-            background: #020617;
-            border: 1px solid #1e293b;
+        .chat-box {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 15px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 12px;
-            height: 160px;
+            height: 280px;
             overflow-y: auto;
-            color: #38bdf8;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        /* TABLE STYLING FOR GUARD APPROVALS */
-        .visitor-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 13px;
-        }
-        .visitor-table th, .visitor-table td {
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .visitor-table th {
-            background-color: rgba(15, 23, 42, 0.8);
-            color: #38bdf8;
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
         }
 
-        /* MODALS */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: var(--bg-card); padding: 30px; border-radius: 12px; width: 90%; max-width: 420px; border: 1px solid var(--border-color); }
+        @keyframes pulse-red {
+            0%, 100% { background-color: rgba(220, 38, 38, 0.9); }
+            50% { background-color: rgba(153, 27, 27, 1); }
+        }
+        .sos-active-banner {
+            animation: pulse-red 1.2s infinite;
+        }
     </style>
 </head>
 <body>
 
-    <!-- 1. FULL SCREEN LOGIN WITH ROLE SELECTOR -->
-    <div id="loginScreen">
-        <div class="login-box">
-            <h2>ParkEZ Ecosystem</h2>
-            <p>Shree Pant Nagari Co-Op Housing Society Ltd.</p>
-            <form onsubmit="handleLogin(event)">
-                <label style="font-size: 12px; color: var(--text-sub); display: block; text-align: left;">Portal User Role</label>
-                <select id="userRole" onchange="toggleRoleInput(this.value)">
-                    <option value="resident">Resident Portal</option>
-                    <option value="security">Gate Security Guard / Admin</option>
-                </select>
+    <!-- ================= LOGIN SCREEN ================= -->
+    <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-4">
+        <div class="glass-panel w-full max-w-md p-8 bg-slate-900/90 text-center border border-slate-700 shadow-2xl rounded-2xl">
+            <div class="inline-flex p-3 rounded-2xl bg-sky-500/10 text-sky-400 mb-3">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-sky-400 tracking-tight">ParkEZ Ecosystem</h2>
+            <p class="text-xs text-slate-400 mb-6">Shree Pant Nagari Co-Op Housing Society Ltd.</p>
 
-                <input type="text" id="userFlat" placeholder="Flat / Unit No. (e.g. A-302)" required>
-                <input type="password" id="userPass" placeholder="Security Access PIN" required>
-                
-                <button type="submit" class="btn" style="background: var(--accent-blue);">Login to Portal</button>
+            <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Select Portal Access Role</label>
+                    <select id="userRole" onchange="toggleRoleInput(this.value)" class="w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                        <option value="resident">Resident Portal Access</option>
+                        <option value="security">Guard / Security Desk Access</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1" id="userFlatLabel">Flat / Unit Number</label>
+                    <input type="text" id="userFlat" placeholder="e.g. Flat A-302" required class="w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Access Passcode / PIN</label>
+                    <input type="password" id="userPass" value="1234" placeholder="Enter PIN" required class="w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                </div>
+
+                <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-3 rounded-lg text-sm transition-all duration-200 shadow-lg shadow-sky-600/30">
+                    Login to Portal
+                </button>
             </form>
+            <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-500">
+                <span>Demo Quick Pin: <strong>1234</strong></span>
+            </div>
         </div>
     </div>
 
-    <!-- 2. MAIN APP INTERFACE WITH SIDEBAR -->
-    <div id="appContainer">
-        <div style="display: flex; height: 100%; width: 100%;">
+    <!-- ================= MAIN APPLICATION ================= -->
+    <div id="appContainer" class="flex h-screen w-screen overflow-hidden">
+        
+        <!-- SIDEBAR -->
+        <div class="w-64 bg-slate-950 text-slate-100 flex flex-col border-r border-slate-800 shrink-0">
+            <div class="p-5 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-sky-500/20 text-sky-400 rounded-lg">🅿️</span>
+                    <div>
+                        <h2 id="sidebarPortalHeading" class="font-bold text-sky-400 text-base leading-tight">ParkEZ Portal</h2>
+                        <span class="text-xs text-slate-500">Shree Pant Nagari CHS</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto py-4">
+                <!-- RESIDENT NAV GROUP -->
+                <div id="residentNavGroup">
+                    <div class="px-5 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Resident Operations</div>
+                    <div class="nav-item active" onclick="switchView('dashboardView', this)"><span>📊</span> Live Slot Map</div>
+                    <div class="nav-item" onclick="switchView('parkingView', this)"><span>🚗</span> Slot Booking & Pass</div>
+                    <div class="nav-item" onclick="switchView('visitorView', this)"><span>🏷️</span> Guest Pre-Auth</div>
+                    <div class="nav-item" onclick="switchView('evDockView', this)"><span>⚡</span> EV Charging Meter</div>
+                    <div class="nav-item" onclick="switchView('disputeView', this)"><span>🚨</span> Towing & Disputes</div>
+                    <div class="nav-item" onclick="switchView('subletView', this)"><span>🤝</span> P2P Slot Exchange</div>
+                    <div class="nav-item" onclick="switchView('guardDutyFeedView', this)"><span>📋</span> Guard Duty Logs</div>
+                    <div class="nav-item" onclick="switchView('sosView', this)"><span>🆘</span> Emergency SOS Panic</div>
+
+                    <div class="px-5 py-2 mt-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Billing & Society</div>
+                    <div class="nav-item" onclick="switchView('billingView', this)"><span>💳</span> Subscriptions & PDF</div>
+                    <div class="nav-item" onclick="switchView('carwashView', this)"><span>🧼</span> Car Wash Booking</div>
+                    <div class="nav-item" onclick="switchView('residentNoticeView', this)"><span>📢</span> Society Notice Board</div>
+                    <div class="nav-item" onclick="switchView('residentChatView', this)"><span>💬</span> Society Message Board</div>
+                </div>
+
+                <!-- GUARD NAV GROUP -->
+                <div id="guardNavGroup" style="display: none;">
+                    <div class="px-5 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Gate & Security Controls</div>
+                    <div class="nav-item active" onclick="switchView('securityView', this)"><span>🛡️</span> SG90 Barrier Control</div>
+                    <div class="nav-item" onclick="switchView('guardApprovalsView', this)"><span>📋</span> Guest Approvals Queue</div>
+                    <div class="nav-item" onclick="switchView('guardTowingView', this)"><span>⚠️</span> Violation Tickets</div>
+                    <div class="nav-item" onclick="switchView('directoryView', this)"><span>🔍</span> Vehicle Directory Search</div>
+                    <div class="nav-item" onclick="switchView('logbookView', this)"><span>📋</span> Shift Duty Logbook</div>
+                    <div class="nav-item" onclick="switchView('manualEntryView', this)"><span>🚗</span> Manual Visitor Logger</div>
+                    <div class="nav-item" onclick="switchView('fineCalculatorView', this)"><span>💰</span> Overstay Calculator</div>
+                    <div class="nav-item" onclick="switchView('evacView', this)"><span>🚨</span> Emergency Evac Mode</div>
+                    <div class="nav-item" onclick="switchView('qrScannerView', this)"><span>📷</span> QR Pass Scanner Sim</div>
+                    <div class="nav-item" onclick="switchView('attendanceView', this)"><span>⏱️</span> Guard Sign-In</div>
+                    <div class="nav-item" onclick="switchView('incidentView', this)"><span>⚠️</span> Security Incident Log</div>
+                    <div class="nav-item" onclick="switchView('ledgerView', this)"><span>📑</span> Export CSV Audit</div>
+                    <div class="nav-item" onclick="switchView('guardChatView', this)"><span>💬</span> Guard & Admin Board</div>
+                </div>
+
+                <div class="px-5 py-2 mt-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Analytics</div>
+                <div class="nav-item" onclick="switchView('analyticsView', this)"><span>📈</span> Peak Hour Analytics</div>
+            </nav>
+
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 flex justify-between items-center">
+                <span>API Status:</span>
+                <span class="inline-flex items-center gap-1.5 text-emerald-400 font-mono text-[11px]"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Live Sync</span>
+            </div>
+        </div>
+
+        <!-- WORKSPACE AREA -->
+        <div class="flex-1 flex flex-col h-full overflow-hidden">
             
-            <!-- SIDEBAR -->
-            <div class="sidebar">
-                <div class="sidebar-brand">
-                    <h2>ParkEZ Portal</h2>
-                    <span>Shree Pant Nagari Society</span>
+            <!-- HEADER -->
+            <header class="h-16 border-b border-slate-700/60 bg-slate-900/60 flex justify-between items-center px-6 shrink-0">
+                <div class="flex items-center gap-3">
+                    <h3 id="currentViewTitle" class="text-lg font-bold text-sky-400">Overview & Live Map</h3>
                 </div>
-
-                <ul class="nav-menu">
-                    <div class="nav-category">Main Menu</div>
-                    <li class="nav-item active" onclick="switchView('dashboardView', this)">
-                        <span>📊</span> Overview & Live Map
-                    </li>
-                    
-                    <div class="nav-category">Resident Operations</div>
-                    <li class="nav-item" id="navPrebook" onclick="switchView('parkingView', this)">
-                        <span>🚗</span> Slot Pre-Booking & Pass
-                    </li>
-                    <li class="nav-item" id="navVisitor" onclick="switchView('visitorView', this)">
-                        <span>🏷️</span> Visitor Registration
-                    </li>
-
-                    <div class="nav-category">Billing & Passes</div>
-                    <li class="nav-item" id="navBilling" onclick="switchView('billingView', this)">
-                        <span>💳</span> Subscriptions & Receipts
-                    </li>
-
-                    <div class="nav-category">Administration & Gate</div>
-                    <li class="nav-item" id="navSecurity" onclick="switchView('securityView', this)">
-                        <span>🛡️</span> Security Gate Control
-                    </li>
-                    <li class="nav-item" onclick="switchView('carwashView', this)">
-                        <span>🧼</span> Society Services
-                    </li>
-                    <li class="nav-item" onclick="switchView('analyticsView', this)">
-                        <span>📈</span> Peak Hour Analytics
-                    </li>
-                </ul>
-            </div>
-
-            <!-- MAIN WORKSPACE -->
-            <div class="main-wrapper">
                 
-                <!-- TOP HEADER -->
-                <div class="top-header">
-                    <h3 id="currentViewTitle" style="margin:0; color:#38bdf8;">Overview & Live Map</h3>
-                    <div class="user-profile">
-                        <span id="activeRoleBadge" style="background: #0284c7; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold;">RESIDENT</span>
-                        <span id="activeUserDisplay" style="font-size: 14px; font-weight: 600;">Flat: A-302</span>
-                        <button class="btn" style="width: auto; padding: 6px 12px; margin: 0;" onclick="toggleTheme()">🌓 Theme</button>
-                        <button class="btn" style="width: auto; padding: 6px 12px; margin: 0; background: #dc2626;" onclick="handleLogout()">Logout</button>
-                    </div>
-                </div>
-
-                <!-- BODY CONTENT VIEWS -->
-                <div class="content-body">
-
-                    <!-- LIVE PARKING FULL WARNING BANNER -->
-                    <div id="fullAlertBanner">
-                        ⚠️ PARKING FULL: All parking slots are currently occupied or reserved!
-                    </div>
+                <div class="flex items-center gap-4">
+                    <span id="activeRoleBadge" class="bg-sky-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">RESIDENT</span>
+                    <span id="activeUserDisplay" class="text-sm font-semibold text-slate-200">Flat: A-302</span>
                     
-                    <!-- VIEW 1: OVERVIEW & VISUAL 2D MAP -->
-                    <div id="dashboardView" class="view-panel active">
-                        
-                        <div class="grid-3">
-                            <div class="card">
-                                <h4>Available Spaces</h4>
-                                <h1 style="font-size: 42px; color: #22c55e; margin: 10px 0;" id="dashAvail">3 / 3</h1>
-                                <p style="font-size: 12px; color: var(--text-sub);">ESP32 Sensor Live Telemetry</p>
-                            </div>
-                            <div class="card">
-                                <h4>Pass Status</h4>
-                                <h2 style="color: #ef4444; margin: 15px 0;" id="dashSub">INACTIVE</h2>
-                                <button class="btn" style="background: var(--accent-green);" onclick="switchView('billingView', null)">Renew Monthly Pass</button>
-                            </div>
-                            <div class="card">
-                                <h4>Quick Pre-Book</h4>
-                                <p style="font-size: 12px; color: var(--text-sub);">Reserve yellow slot prior to arrival</p>
-                                <button class="btn" id="quickBookBtn" style="background: var(--accent-yellow);" onclick="switchView('parkingView', null)">Reserve Slot Now</button>
-                            </div>
-                        </div>
-
-                        <!-- VISUAL 2D FLOOR MAP -->
-                        <div class="card">
-                            <h3>Live Floor Parking Layout Map</h3>
-                            <p style="font-size: 12px; color: var(--text-sub);">Real-time visual map synced with ESP32 IR sensors in Shree Pant Nagari premises</p>
-
-                            <div class="parking-map-container">
-                                <div class="map-header">
-                                    <span style="font-size: 12px; font-weight: bold; color: #38bdf8;">GROUND FLOOR - PARKING BAY A</span>
-                                    <span style="font-size: 11px; color: var(--text-sub);">[ ESP32 EDGE GATE CONTROL ACTIVE ]</span>
-                                </div>
-
-                                <div class="driveway-lane">
-                                    ⬆️ MAIN DRIVEWAY LANE / VEHICLE ENTRY GUEST PATH ⬇️
-                                </div>
-
-                                <div class="map-slots-grid">
-                                    <!-- MAP SLOT 1 -->
-                                    <div id="mapBox1" class="map-slot-box slot-free">
-                                        <div class="slot-name">SLOT 01</div>
-                                        <div id="mapIcon1" class="car-icon">🟢</div>
-                                        <div id="mapPill1" class="status-pill">VACANT</div>
-                                    </div>
-
-                                    <!-- MAP SLOT 2 -->
-                                    <div id="mapBox2" class="map-slot-box slot-free">
-                                        <div class="slot-name">SLOT 02</div>
-                                        <div id="mapIcon2" class="car-icon">🟢</div>
-                                        <div id="mapPill2" class="status-pill">VACANT</div>
-                                    </div>
-
-                                    <!-- MAP SLOT 3 -->
-                                    <div id="mapBox3" class="map-slot-box slot-free">
-                                        <div class="slot-name">SLOT 03</div>
-                                        <div id="mapIcon3" class="car-icon">🟢</div>
-                                        <div id="mapPill3" class="status-pill">VACANT</div>
-                                    </div>
-                                </div>
-
-                                <div class="map-legend">
-                                    <div class="legend-item"><div class="legend-dot" style="background:#22c55e;"></div> Vacant</div>
-                                    <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div> Occupied</div>
-                                    <div class="legend-item"><div class="legend-dot" style="background:#eab308;"></div> Pre-Booked (Hold)</div>
-                                </div>
-                            </div>
-
-                            <!-- AUDIT LOG & HARDWARE SIMULATION -->
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                                <div>
-                                    <h5 style="margin: 0 0 8px 0; color: #38bdf8;">📜 Real-Time System Activity Log</h5>
-                                    <div id="systemLog" class="log-terminal">
-                                        [00:00:00] System Initialized.<br>
-                                        [00:00:00] ESP32 Gateway Connected.<br>
-                                    </div>
-                                </div>
-
-                                <div style="background: rgba(30, 41, 59, 0.5); padding: 15px; border-radius: 8px; border: 1px dashed var(--border-color);">
-                                    <h5 style="margin: 0 0 10px 0; color: #38bdf8;">🧪 Live IR Sensor Hardware Controls</h5>
-                                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                                        <button class="btn" style="margin:0; background:#334155; font-size:12px;" onclick="toggleSensor(1)">Toggle IR Sensor 1</button>
-                                        <button class="btn" style="margin:0; background:#334155; font-size:12px;" onclick="toggleSensor(2)">Toggle IR Sensor 2</button>
-                                        <button class="btn" style="margin:0; background:#334155; font-size:12px;" onclick="toggleSensor(3)">Toggle IR Sensor 3</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <!-- VIEW 2: PARKING & PRE-BOOKING WITH QR PASS -->
-                    <div id="parkingView" class="view-panel">
-                        <div class="grid-3">
-                            <div class="card">
-                                <h3>Pre-Booking System</h3>
-                                <p style="font-size: 12px; color: var(--text-sub);">Select a vacant slot to hold before driving into society compound</p>
-                                
-                                <select id="slotSelect">
-                                    <option value="1">Reserve Slot 1</option>
-                                    <option value="2">Reserve Slot 2</option>
-                                    <option value="3">Reserve Slot 3</option>
-                                </select>
-                                <button class="btn" id="prebookActionBtn" style="background: var(--accent-yellow);" onclick="triggerPreBook()">📌 Pre-Book Selected Slot</button>
-                            </div>
-
-                            <div class="card" style="text-align: center;">
-                                <h3>Digital Gate Pass QR</h3>
-                                <p style="font-size: 12px; color: var(--text-sub);">Scan QR at compound gate for automated barrier opening</p>
-                                <div id="qrcode" style="display: flex; justify-content: center; margin: 15px 0;"></div>
-                                <span id="qrPassCode" style="font-weight: bold; font-family: monospace; color: #38bdf8;">NO ACTIVE RESERVATION</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- VIEW 3: VISITOR REGISTRATION -->
-                    <div id="visitorView" class="view-panel">
-                        <div class="card" style="max-width: 500px;">
-                            <h3>Register Upcoming Guest Vehicle</h3>
-                            <p style="font-size: 12px; color: var(--text-sub);">Pre-authorizes guest vehicles so security guard can approve entrance at gate</p>
-                            
-                            <input type="text" id="visitorName" placeholder="Guest Name">
-                            <input type="text" id="visitorPlate" placeholder="Vehicle Number (e.g., MH-04-AB-1234)">
-                            <button class="btn" style="background: var(--accent-blue);" onclick="registerVisitor()">Register Visitor Vehicle</button>
-                        </div>
-                    </div>
-
-                    <!-- VIEW 4: BILLING & RECEIPTS -->
-                    <div id="billingView" class="view-panel">
-                        <div class="grid-3">
-                            <div class="card">
-                                <h3>Monthly Resident Pass</h3>
-                                <p>Fee: ₹1,000 / Month</p>
-                                <label style="font-size: 13px;">
-                                    <input type="checkbox" id="autoPayBox" style="width: auto;"> Enable Auto-Debit on 1st
-                                </label>
-                                <button class="btn" style="background: var(--accent-green);" onclick="openPayModal('Monthly Subscription', 1000)">Pay ₹1,000 via UPI</button>
-                            </div>
-                            <div class="card">
-                                <h3>Transaction History</h3>
-                                <p style="font-size: 12px; color: var(--text-sub);">Download verified digital e-receipts</p>
-                                <button class="btn" onclick="generateReceiptModal()">📄 Download Last PDF Receipt</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- VIEW 5: SECURITY GUARD GATE DASHBOARD -->
-                    <div id="securityView" class="view-panel">
-                        <div class="grid-3">
-                            <div class="card">
-                                <h3>Gate Barrier SG90 Servo Control</h3>
-                                <p style="font-size: 12px; color: var(--text-sub);">Manual override controls for compound entrance gate</p>
-                                <div id="gateStatusDisplay" style="font-size: 20px; font-weight: bold; color: #ef4444; margin: 15px 0;">
-                                    GATE STATUS: CLOSED 🔴
-                                </div>
-                                <button class="btn" style="background: var(--accent-green);" onclick="triggerGate('OPEN')">🟢 Manual Open Gate</button>
-                                <button class="btn" style="background: var(--accent-red);" onclick="triggerGate('CLOSED')">🔴 Emergency Lock Gate</button>
-                            </div>
-
-                            <div class="card">
-                                <h3>Log Unregistered Guest Vehicle</h3>
-                                <p style="font-size: 12px; color: var(--text-sub);">Manual entry log for non-registered visitors</p>
-                                <input type="text" id="secPlate" placeholder="Vehicle Number">
-                                <input type="text" id="secFlat" placeholder="Flat To Visit">
-                                <button class="btn" style="background: var(--accent-purple);" onclick="logGuardEntry()">Log Vehicle Entry</button>
-                            </div>
-                        </div>
-
-                        <!-- GUARD VISITOR APPROVAL PANEL -->
-                        <div class="card">
-                            <h3>Pre-Approved Visitor Approvals</h3>
-                            <p style="font-size: 12px; color: var(--text-sub);">Visitors pre-registered by residents waiting for gate clearance</p>
-                            <div style="overflow-x: auto;">
-                                <table class="visitor-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Guest Name</th>
-                                            <th>Vehicle Number</th>
-                                            <th>Host Flat</th>
-                                            <th>Status</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="guardVisitorTableBody">
-                                        <!-- Dynamic visitor approvals injected here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- VIEW 6: CAR WASH SERVICE -->
-                    <div id="carwashView" class="view-panel">
-                        <div class="card" style="max-width: 500px;">
-                            <h3>Book Society Car Wash</h3>
-                            <p style="font-size: 12px; color: var(--text-sub);">Notifies appointed cleaner Ramesh K. automatically</p>
-                            <select id="washPackage">
-                                <option value="Basic Foam Wash - ₹200">Basic Foam Wash (₹200)</option>
-                                <option value="Deep Interior & Exterior - ₹500">Deep Interior & Exterior (₹500)</option>
-                            </select>
-                            <button class="btn" style="background: var(--accent-purple);" onclick="bookWashService()">🧼 Confirm & Pay</button>
-                        </div>
-                    </div>
-
-                    <!-- VIEW 7: PEAK HOUR ANALYTICS -->
-                    <div id="analyticsView" class="view-panel">
-                        <div class="card">
-                            <h3>Evening Peak Hour Occupancy Tracker</h3>
-                            <p style="font-size: 12px; color: var(--text-sub);">Tracks peak hours when residents return home from work</p>
-                            <canvas id="peakChartCanvas" height="120"></canvas>
-                        </div>
-                    </div>
-
+                    <button onclick="toggleTheme()" class="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-800 border border-slate-700 text-xs flex items-center gap-1">
+                        🌓 Theme
+                    </button>
+                    <button onclick="handleLogout()" class="px-3 py-1.5 bg-red-600/80 hover:bg-red-600 text-white rounded-lg text-xs font-medium transition-all">
+                        Logout
+                    </button>
                 </div>
+            </header>
+
+            <!-- SYSTEM SOS ALERT BANNER (GUARD PORTAL SYNC) -->
+            <div id="guardSosGlobalBanner" class="sos-active-banner text-white px-6 py-3 flex justify-between items-center hidden shadow-lg">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl animate-bounce">🚨</span>
+                    <div>
+                        <h4 class="font-bold text-sm">EMERGENCY SOS ALERT RECEIVED!</h4>
+                        <p id="guardSosBannerDetail" class="text-xs text-red-100">Resident Flat A-302 activated emergency panic signal.</p>
+                    </div>
+                </div>
+                <button onclick="clearSOSAlert()" class="bg-white text-red-900 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-red-50">
+                    Acknowledge & Clear Alert
+                </button>
             </div>
+
+            <!-- CONTENT BODY -->
+            <main class="flex-1 overflow-y-auto p-6 space-y-6">
+                
+                <div id="fullAlertBanner" class="hidden bg-red-900/40 border border-red-500 text-red-200 p-4 rounded-xl text-center text-sm font-semibold">
+                    ⚠️ PARKING FULL: All parking slots are currently occupied or reserved!
+                </div>
+
+                <!-- ================= RESIDENT PANELS ================= -->
+                
+                <!-- LIVE SLOT MAP -->
+                <div id="dashboardView" class="view-panel active space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="glass-panel p-5">
+                            <span class="text-xs text-slate-400 font-semibold uppercase">Available Parking Bays</span>
+                            <h1 class="text-4xl font-extrabold text-emerald-400 my-2" id="dashAvail">3 / 3</h1>
+                            <p class="text-xs text-slate-400">Real-time ESP32 IR Telemetry</p>
+                        </div>
+                        <div class="glass-panel p-5">
+                            <span class="text-xs text-slate-400 font-semibold uppercase">Monthly Pass Status</span>
+                            <h2 class="text-2xl font-bold text-red-400 my-2" id="dashSub">INACTIVE</h2>
+                            <button onclick="switchView('billingView', null)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-2 rounded-lg transition-all">
+                                Renew Monthly Subscription
+                            </button>
+                        </div>
+                        <div class="glass-panel p-5">
+                            <span class="text-xs text-slate-400 font-semibold uppercase">Quick Parking Pre-Book</span>
+                            <p class="text-xs text-slate-400 mt-1 mb-3">Reserve slot prior to arrival at gate</p>
+                            <button onclick="switchView('parkingView', null)" class="w-full bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold py-2 rounded-lg transition-all">
+                                Reserve Slot Now
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6">
+                        <div class="flex justify-between items-center mb-4 border-b border-slate-700/60 pb-3">
+                            <h3 class="font-bold text-sky-400">Live Floor Parking Bay A</h3>
+                            <span class="text-xs text-slate-400 font-mono">[ ESP32 SENSOR FEED SYNCED ]</span>
+                        </div>
+                        
+                        <div class="parking-map-container">
+                            <div class="bg-slate-800/80 h-10 rounded-lg flex items-center justify-center text-slate-400 font-mono text-xs font-bold tracking-widest mb-4">
+                                ⬆️ MAIN DRIVEWAY / VEHICLE ENTRY LANE ⬇️
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div id="mapBox1" class="map-slot-box slot-free">
+                                    <span class="text-xs tracking-wider">SLOT 01</span>
+                                    <span id="mapIcon1" class="text-3xl">🟢</span>
+                                    <span id="mapPill1" class="text-xs uppercase font-bold">VACANT</span>
+                                </div>
+                                <div id="mapBox2" class="map-slot-box slot-free">
+                                    <span class="text-xs tracking-wider">SLOT 02</span>
+                                    <span id="mapIcon2" class="text-3xl">🟢</span>
+                                    <span id="mapPill2" class="text-xs uppercase font-bold">VACANT</span>
+                                </div>
+                                <div id="mapBox3" class="map-slot-box slot-free">
+                                    <span class="text-xs tracking-wider">SLOT 03 (EV)</span>
+                                    <span id="mapIcon3" class="text-3xl">🟢</span>
+                                    <span id="mapPill3" class="text-xs uppercase font-bold">VACANT</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <h5 class="text-xs font-bold text-sky-400 mb-2">📜 Activity Log Terminal</h5>
+                                <div id="systemLog" class="bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-sky-400 h-32 overflow-y-auto">
+                                    [00:00:00] System state operational.<br>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800/40 p-3 rounded-lg border border-slate-700/60">
+                                <h5 class="text-xs font-bold text-sky-400 mb-2">🧪 IR Telemetry Overrides (Hardware Sim)</h5>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button onclick="toggleSensor(1)" class="bg-slate-700 hover:bg-slate-600 text-xs text-white py-2 rounded font-mono">Toggle IR 1</button>
+                                    <button onclick="toggleSensor(2)" class="bg-slate-700 hover:bg-slate-600 text-xs text-white py-2 rounded font-mono">Toggle IR 2</button>
+                                    <button onclick="toggleSensor(3)" class="bg-slate-700 hover:bg-slate-600 text-xs text-white py-2 rounded font-mono">Toggle IR 3</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRE-BOOKING & QR -->
+                <div id="parkingView" class="view-panel space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-panel p-6">
+                            <h3 class="font-bold text-sky-400 mb-4">Reserve Parking Slot</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Select Bay Slot</label>
+                                    <select id="slotSelect" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                                        <option value="1">Reserve Slot 01</option>
+                                        <option value="2">Reserve Slot 02</option>
+                                        <option value="3">Reserve Slot 03 (EV Station)</option>
+                                    </select>
+                                </div>
+                                <button onclick="triggerPreBook()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                                    📌 Pre-Book Selected Slot
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-6 text-center">
+                            <h3 class="font-bold text-sky-400 mb-2">Digital Gate Access Pass</h3>
+                            <p class="text-xs text-slate-400 mb-4">Scan QR pass code at security barrier for automated entry</p>
+                            <div id="qrcode" class="flex justify-center p-3 bg-white rounded-xl w-36 h-36 mx-auto mb-3 items-center"></div>
+                            <span id="qrPassCode" class="font-mono text-sm font-bold text-sky-400 block">NO ACTIVE RESERVATION</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GUEST PRE-AUTH -->
+                <div id="visitorView" class="view-panel">
+                    <div class="glass-panel max-w-lg p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">Guest Vehicle Pre-Authorization</h3>
+                        <p class="text-xs text-slate-400">Pre-cleared vehicles will show up instantly in the security guard queue for fast clearance.</p>
+                        <input type="text" id="visitorName" placeholder="Guest Name" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                        <input type="text" id="visitorPlate" placeholder="Vehicle License Plate (e.g. MH-04-AB-1234)" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                        <button onclick="registerVisitor()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                            Register Visitor for Gate Clearance
+                        </button>
+                    </div>
+                </div>
+
+                <!-- EV CHARGING -->
+                <div id="evDockView" class="view-panel">
+                    <div class="glass-panel max-w-md p-6 text-center space-y-4">
+                        <h3 class="font-bold text-sky-400">EV Smart Fast Charging Meter (Slot 03)</h3>
+                        <div class="p-4 bg-slate-900 rounded-xl border border-slate-700">
+                            <span class="text-xs text-slate-400 block">Station Status</span>
+                            <h2 id="evStatusText" class="text-xl font-bold text-emerald-400 mt-1">READY</h2>
+                            <div class="mt-4 flex justify-around text-sm">
+                                <div><span class="text-xs text-slate-500 block">Energy Consumed</span><strong id="evUnitsCount" class="text-sky-400 text-lg">0.0</strong> kWh</div>
+                                <div><span class="text-xs text-slate-500 block">Current Bill</span><strong class="text-amber-400 text-lg">₹<span id="evCostCount">0</span></strong></div>
+                            </div>
+                        </div>
+                        <button id="evToggleBtn" onclick="toggleEVCharging()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg text-sm">
+                            ⚡ Start Charging Session
+                        </button>
+                    </div>
+                </div>
+
+                <!-- DISPUTES & TOWING -->
+                <div id="disputeView" class="view-panel">
+                    <div class="glass-panel max-w-lg p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">Report Slot Violation & Towing Ticket</h3>
+                        <p class="text-xs text-slate-400">Is an unauthorized vehicle parked in your assigned slot? Dispatch guard immediately.</p>
+                        <input type="text" id="disputeSlotNo" placeholder="Your Slot Number (e.g. Slot 02)" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                        <input type="text" id="disputeCarNo" placeholder="Offending Vehicle License Plate" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                        <button onclick="raiseDisputeTicket()" class="w-full bg-red-600 hover:bg-red-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                            🚨 Send High-Priority Alert to Guard Desk
+                        </button>
+                        <div id="disputeStatusMsg" class="text-xs font-bold text-emerald-400 mt-2"></div>
+                    </div>
+                </div>
+
+                <!-- P2P SUB-LETTING -->
+                <div id="subletView" class="view-panel">
+                    <div class="glass-panel max-w-lg p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">P2P Parking Slot Exchange</h3>
+                        <p class="text-xs text-slate-400">Going out of town? Sub-let your slot to other residents.</p>
+                        <select id="subletSlotNo" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                            <option value="Slot 01">Slot 01</option>
+                            <option value="Slot 02">Slot 02</option>
+                        </select>
+                        <input type="text" id="subletDays" placeholder="Available Duration (e.g., 2 Days)" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                        <button onclick="listSubletSlot()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                            🤝 Post to Marketplace
+                        </button>
+                        <div id="subletMarketplace" class="text-xs text-slate-400 mt-2 bg-slate-900 p-3 rounded-lg">Listings: None active</div>
+                    </div>
+                </div>
+
+                <!-- GUARD SHIFT LOGS (RESIDENT VIEW) -->
+                <div id="guardDutyFeedView" class="view-panel">
+                    <div class="glass-panel max-w-2xl p-6">
+                        <h3 class="font-bold text-sky-400 mb-1">📋 Guard Shift Logs & Handover Feed</h3>
+                        <p class="text-xs text-slate-400 mb-4">Live feed synced directly from Security Guard Desk.</p>
+                        <div id="residentGuardDutyLogList" class="bg-slate-950 border border-slate-800 rounded-lg p-4 text-xs font-mono text-slate-300 h-64 overflow-y-auto space-y-2">
+                            <!-- Populated dynamically via state sync -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SOS PANIC -->
+                <div id="sosView" class="view-panel">
+                    <div class="glass-panel max-w-md p-6 text-center space-y-4 border-red-500/40">
+                        <h3 class="font-bold text-red-500 text-xl">🆘 Emergency SOS Panic Alert</h3>
+                        <p class="text-xs text-slate-400">Immediately triggers a loud emergency strobe alert on the Guard Desk console.</p>
+                        <button onclick="triggerSOS()" class="w-full bg-red-700 hover:bg-red-600 text-white font-bold py-6 rounded-xl text-lg tracking-wider shadow-lg shadow-red-700/40 transition-all">
+                            🚨 PRESS FOR EMERGENCY HELP
+                        </button>
+                        <p id="sosAlertMsg" class="text-xs font-bold text-red-400 min-h-[1rem]"></p>
+                    </div>
+                </div>
+
+                <!-- BILLING & SUBSCRIPTIONS -->
+                <div id="billingView" class="view-panel">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-panel p-6 space-y-4">
+                            <h3 class="font-bold text-sky-400">Monthly Resident Pass</h3>
+                            <p class="text-sm text-slate-300">Unlimited parking access token: ₹1,000 / Month</p>
+                            <button onclick="openPayModal('Monthly Subscription', 1000)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                                Pay ₹1,000 via UPI
+                            </button>
+                        </div>
+                        <div class="glass-panel p-6 space-y-4">
+                            <h3 class="font-bold text-sky-400">Verified Payment PDF Receipt</h3>
+                            <p class="text-xs text-slate-400">Download officially stamped PDF receipt for reimbursement.</p>
+                            <button onclick="generateReceiptModal()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                                📄 Download PDF Receipt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CAR WASH -->
+                <div id="carwashView" class="view-panel">
+                    <div class="glass-panel max-w-lg p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">Society Car Wash Service</h3>
+                        <select id="washPackage" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                            <option value="Basic Foam Wash - ₹200">Basic Foam Wash (₹200)</option>
+                            <option value="Deep Interior & Exterior - ₹500">Deep Interior & Exterior (₹500)</option>
+                        </select>
+                        <button onclick="bookWashService()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                            🧼 Confirm Booking & Pay
+                        </button>
+                    </div>
+                </div>
+
+                <!-- NOTICE BOARD -->
+                <div id="residentNoticeView" class="view-panel">
+                    <div class="glass-panel max-w-2xl p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">Society Official Notice Board</h3>
+                        <div class="bg-slate-900 p-4 rounded-lg border-l-4 border-sky-400">
+                            <h4 class="font-bold text-sm text-sky-300">Notice: Gate #2 Sensor Maintenance</h4>
+                            <p class="text-xs text-slate-400 mt-1">Gate #2 will remain closed tomorrow from 10 AM to 1 PM for sensor calibration.</p>
+                            <span class="text-[10px] text-slate-500 mt-2 block">Posted by Society Managing Committee</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RESIDENT MESSAGE BOARD -->
+                <div id="residentChatView" class="view-panel">
+                    <div class="glass-panel max-w-2xl p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">💬 General Society Message Board</h3>
+                        <p class="text-xs text-slate-400">Broadcast announcements and coordinate directly with society members & security guard desk.</p>
+                        <div id="residentChatBox" class="chat-box"></div>
+                        <div class="flex gap-2">
+                            <input type="text" id="residentChatInput" placeholder="Type message to society..." class="flex-1 bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                            <button onclick="sendResidentMessage()" class="bg-sky-600 hover:bg-sky-500 text-white px-5 rounded-lg text-sm font-semibold">Send</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- ================= GUARD PANELS ================= -->
+                
+                <!-- GUARD BARRIER OVERRIDE -->
+                <div id="securityView" class="view-panel space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-panel p-6">
+                            <h3 class="font-bold text-sky-400 mb-2">SG90 Servo Gate Barrier Control</h3>
+                            <div id="gateStatusDisplay" class="text-lg font-bold text-red-500 my-4">GATE BARRIER STATUS: CLOSED 🔴</div>
+                            <div class="space-y-2">
+                                <button onclick="triggerGate('OPEN')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                                    🟢 Open Gate Barrier
+                                </button>
+                                <button onclick="triggerGate('CLOSED')" class="w-full bg-red-600 hover:bg-red-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                                    🔴 Lock Gate Barrier
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-6">
+                            <h3 class="font-bold text-sky-400 mb-2">Live SOS Panic Alerts Box</h3>
+                            <div id="sosInbox" class="p-4 bg-slate-900 rounded-lg text-slate-400 text-xs font-mono">
+                                No active emergency alerts.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GUEST APPROVALS QUEUE -->
+                <div id="guardApprovalsView" class="view-panel">
+                    <div class="glass-panel p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">Pending Guest Vehicle Clearance Queue</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-300">
+                                <thead class="bg-slate-900 text-sky-400 uppercase text-[10px] tracking-wider">
+                                    <tr>
+                                        <th class="p-3">Guest Name</th>
+                                        <th class="p-3">Vehicle Plate</th>
+                                        <th class="p-3">Host Flat</th>
+                                        <th class="p-3">Status</th>
+                                        <th class="p-3">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="guardVisitorTableBody" class="divide-y divide-slate-800"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIOLATION TICKETS (GUARD) -->
+                <div id="guardTowingView" class="view-panel">
+                    <div class="glass-panel p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">⚠️ Reported Parking Violation & Towing Tickets</h3>
+                        <div id="guardTowingTicketsList" class="space-y-3">
+                            <!-- Populated dynamically via state sync -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DIRECTORY SEARCH -->
+                <div id="directoryView" class="view-panel">
+                    <div class="glass-panel max-w-xl p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">Resident Vehicle Directory Lookup</h3>
+                        <input type="text" id="searchVehicleInput" placeholder="Enter Vehicle License Plate (e.g., MH-04...)" onkeyup="searchVehicleDirectory()" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                        <div id="directoryResultBox" class="p-4 bg-slate-900 rounded-lg text-xs text-slate-400">
+                            Enter license plate above to query registry.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GUARD SHIFT LOGBOOK -->
+                <div id="logbookView" class="view-panel">
+                    <div class="glass-panel max-w-xl p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">Guard Shift Duty Logbook</h3>
+                        <p class="text-xs text-slate-400">Logs posted here automatically broadcast live to the Resident Portal log feed.</p>
+                        <input type="text" id="dutyGuardName" placeholder="Guard Name" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                        <textarea id="dutyGuardNote" placeholder="Shift Handover Notes..." rows="3" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm"></textarea>
+                        <button onclick="saveDutyLog()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                            Save & Broadcast Shift Log
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MANUAL ENTRY LOGGER -->
+                <div id="manualEntryView" class="view-panel">
+                    <div class="glass-panel max-w-md p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">Manual Visitor Entry Logger</h3>
+                        <input type="text" id="secPlate" placeholder="Vehicle Number" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                        <input type="text" id="secFlat" placeholder="Flat To Visit" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                        <button onclick="logGuardEntry()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                            Log Walk-in Entry
+                        </button>
+                    </div>
+                </div>
+
+                <!-- FINE CALCULATOR -->
+                <div id="fineCalculatorView" class="view-panel">
+                    <div class="glass-panel max-w-md p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">Overstay Fine Calculator (₹50 / hr)</h3>
+                        <input type="number" id="overstayHours" placeholder="Excess Hours Parked" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                        <button onclick="calcOverstayFine()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                            Calculate Penalty
+                        </button>
+                        <h4 id="fineResultBox" class="text-lg font-bold text-sky-400"></h4>
+                    </div>
+                </div>
+
+                <!-- EMERGENCY EVACUATION -->
+                <div id="evacView" class="view-panel">
+                    <div class="glass-panel max-w-md p-6 text-center space-y-4 border-red-500/40">
+                        <h3 class="font-bold text-red-500 text-lg">🚨 Emergency Evacuation Mode</h3>
+                        <p class="text-xs text-slate-400">Forces all gate barriers open during fire or safety emergencies.</p>
+                        <button onclick="triggerEvacMode()" class="w-full bg-red-700 hover:bg-red-600 text-white font-bold py-4 rounded-lg text-sm">
+                            🔓 TRIGGER EVACUATION OPEN
+                        </button>
+                    </div>
+                </div>
+
+                <!-- QR PASS SCANNER SIM -->
+                <div id="qrScannerView" class="view-panel">
+                    <div class="glass-panel max-w-md p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">Gate Pass QR Scanner Simulator</h3>
+                        <input type="text" id="scanPassInput" placeholder="Scan or Enter Pass Code (e.g. PASS-A-302-SLOT01)" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                        <button onclick="simulatePassScan()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                            Verify Pass & Trigger Barrier
+                        </button>
+                        <p id="scanResultMsg" class="text-xs font-bold mt-2"></p>
+                    </div>
+                </div>
+
+                <!-- ATTENDANCE SIGN-IN -->
+                <div id="attendanceView" class="view-panel">
+                    <div class="glass-panel max-w-md p-6 text-center space-y-4">
+                        <h3 class="font-bold text-sky-400">Guard Shift Attendance Sign-In</h3>
+                        <button onclick="markGuardAttendance()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg text-sm">
+                            ✅ Sign-In for Shift
+                        </button>
+                        <p id="attendanceMsg" class="text-xs font-bold text-emerald-400"></p>
+                    </div>
+                </div>
+
+                <!-- SECURITY INCIDENT LOG -->
+                <div id="incidentView" class="view-panel">
+                    <div class="glass-panel max-w-lg p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">Security Incident Log Form</h3>
+                        <input type="text" id="incidentTitle" placeholder="Incident Subject" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                        <textarea id="incidentDesc" placeholder="Detailed description of incident..." rows="3" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm"></textarea>
+                        <button onclick="fileIncidentReport()" class="w-full bg-red-600 hover:bg-red-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                            Submit Security Incident Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- EXPORT CSV AUDIT -->
+                <div id="ledgerView" class="view-panel">
+                    <div class="glass-panel max-w-md p-6 text-center space-y-4">
+                        <h3 class="font-bold text-sky-400">Downloadable Monthly CSV Audit Ledger</h3>
+                        <button onclick="exportCSVLedger()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-3 rounded-lg text-sm">
+                            📑 Export Audit Ledger (CSV)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- GUARD MESSAGE BOARD -->
+                <div id="guardChatView" class="view-panel">
+                    <div class="glass-panel max-w-2xl p-6 space-y-4">
+                        <h3 class="font-bold text-sky-400">💬 Guard & Admin Message Board</h3>
+                        <p class="text-xs text-slate-400">Direct channel for security personnel and management to broadcast updates.</p>
+                        <div id="guardChatBox" class="chat-box"></div>
+                        <div class="flex gap-2">
+                            <input type="text" id="guardChatInput" placeholder="Type announcement or message..." class="flex-1 bg-slate-800 border border-slate-700 text-white rounded-lg p-2.5 text-sm">
+                            <button onclick="sendGuardMessage()" class="bg-sky-600 hover:bg-sky-500 text-white px-5 rounded-lg text-sm font-semibold">Broadcast</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SHARED ANALYTICS -->
+                <div id="analyticsView" class="view-panel">
+                    <div class="glass-panel p-6">
+                        <h3 class="font-bold text-sky-400 mb-4">Evening Peak Hour Occupancy Tracker</h3>
+                        <canvas id="peakChartCanvas" height="100"></canvas>
+                    </div>
+                </div>
+
+            </main>
         </div>
     </div>
 
     <!-- PAYMENT MODAL -->
     <div id="payModal" class="modal">
-        <div class="modal-content">
-            <h3 id="payModalTitle">Payment Checkout</h3>
-            <p id="payAmountText" style="font-size: 18px; font-weight: bold; color: #38bdf8;"></p>
-            <div style="background: white; color: black; padding: 15px; border-radius: 8px; text-align: center; margin: 15px 0;">
-                [ UPI QR CODE ]<br><small>pay@shreepantnagari</small>
+        <div class="glass-panel p-6 max-w-md w-full m-4 bg-slate-900 border-slate-700">
+            <h3 id="payModalTitle" class="font-bold text-lg text-sky-400">Payment Checkout</h3>
+            <p id="payAmountText" class="text-xl font-bold text-white my-2"></p>
+            <div class="bg-white text-slate-900 p-4 rounded-lg text-center font-mono my-4 text-xs font-bold">
+                [ UPI QR CODE SCANNER ]<br>
+                <span class="text-slate-500 font-normal">pay@shreepantnagari</span>
             </div>
-            <button class="btn" style="background: var(--accent-green);" onclick="completePayment()">Confirm Payment</button>
-            <button class="btn" style="background: #dc2626;" onclick="closeModal('payModal')">Cancel</button>
+            <div class="space-y-2">
+                <button onclick="completePayment()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                    Confirm Payment Completion
+                </button>
+                <button onclick="closeModal('payModal')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-lg text-sm">
+                    Cancel
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- RECEIPT MODAL -->
     <div id="receiptModal" class="modal">
-        <div class="modal-content" style="max-width: 420px;">
-            <div id="pdfArea" style="background: white; color: black; padding: 20px; border-radius: 8px;">
-                <h2 style="margin:0; color:#0284c7;">ParkEZ Receipt</h2>
-                <p style="font-size:12px; margin-bottom:15px;">Shree Pant Nagari Co-Op Housing Society</p>
-                <hr>
-                <p><strong>Resident Flat:</strong> <span id="rFlat">A-302</span></p>
-                <p><strong>Service:</strong> Monthly Subscription Pass</p>
-                <p><strong>Amount Paid:</strong> ₹1,000</p>
-                <p><strong>Txn ID:</strong> <span id="rTxn">TXN-881920</span></p>
-                <hr>
-                <p style="font-size:10px; text-align:center;">Official E-Receipt</p>
+        <div class="glass-panel p-6 max-w-md w-full m-4 bg-slate-900 border-slate-700">
+            <div id="pdfArea" class="bg-white text-slate-900 p-6 rounded-lg font-sans">
+                <div class="flex justify-between items-center border-b pb-3 mb-3">
+                    <div>
+                        <h2 class="font-bold text-lg text-sky-700">ParkEZ Receipt</h2>
+                        <p class="text-[10px] text-slate-500">Shree Pant Nagari Co-Op Housing Society</p>
+                    </div>
+                    <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">PAID</span>
+                </div>
+                <div class="text-xs space-y-1.5 my-4">
+                    <p><strong>Resident Flat:</strong> <span id="rFlat">A-302</span></p>
+                    <p><strong>Service:</strong> Monthly Resident Parking Pass</p>
+                    <p><strong>Amount Paid:</strong> ₹1,000</p>
+                    <p><strong>Txn ID:</strong> <span id="rTxn">TXN-881920</span></p>
+                    <p><strong>Date:</strong> <span id="rDate">2026-10-25</span></p>
+                </div>
+                <div class="border-t pt-2 text-[9px] text-slate-400 text-center uppercase tracking-wider">
+                    Official System E-Receipt
+                </div>
             </div>
-            <button class="btn" style="background: var(--accent-green); margin-top:15px;" onclick="downloadPDF()">Download PDF</button>
-            <button class="btn" style="background: #dc2626;" onclick="closeModal('receiptModal')">Close</button>
+            <div class="space-y-2 mt-4">
+                <button onclick="downloadPDF()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg text-sm">
+                    Download PDF Document
+                </button>
+                <button onclick="closeModal('receiptModal')" class="w-full bg-slate-800 text-slate-300 font-semibold py-2 rounded-lg text-sm">
+                    Close Window
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- ================= SCRIPT & REACTIVE STATE SYSTEM ================= -->
     <script>
-        let currentRole = "resident";
-        let currentResident = null;
-        let slots = ["free", "free", "free"]; // State tracking: "free", "occupied", "reserved"
-        let payAmount = 0;
-        let qrcodeObj = null;
+        /*
+          FastAPI Integration Snippet Reference:
+          --------------------------------------
+          const API_BASE_URL = "http://127.0.0.1:8000/api";
+          async function syncWithFastAPI(endpoint, payload) {
+              try {
+                  const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(payload)
+                  });
+                  return await res.json();
+              } catch (err) { console.error("FastAPI Sync Error:", err); }
+          }
+        */
 
-        // Visitor dataset to store pre-registered visitors
-        let registeredVisitors = [
-            { id: 1, name: "Rahul Sharma", plate: "MH-04-AB-1234", flat: "A-302", status: "PENDING" }
-        ];
+        // Reactive State Engine
+        const AppState = {
+            currentRole: "resident",
+            currentResident: "A-302",
+            slots: ["free", "free", "free"],
+            isSOSActive: false,
+            sosDetails: null,
+            visitors: [
+                { id: 101, name: "Rahul Sharma", plate: "MH-04-AB-1234", flat: "A-302", status: "PENDING", time: "18:30" }
+            ],
+            disputes: [
+                { id: 201, slot: "Slot 02", car: "MH-12-RS-9999", flat: "B-101", status: "ALERTED", time: "19:15" }
+            ],
+            guardDutyLogs: [
+                { id: 301, guard: "Guard Rameshkumar", note: "Night shift takeover completed. Perimeter secure.", time: "19:00" }
+            ],
+            chatMessages: [
+                { sender: "Admin - Society Office", text: "Water supply timing updated to 7:00 AM daily.", type: "admin" }
+            ],
+            directoryDB: [
+                { plate: "MH-04-AB-1234", owner: "Rajesh Kumar", flat: "A-302" },
+                { plate: "MH-48-X-9911", owner: "Amit Sharma", flat: "B-202" },
+                { plate: "MH-02-CD-5678", owner: "Sunita Patil", flat: "C-104" }
+            ]
+        };
+
+        let qrcodeObj = null;
 
         function toggleRoleInput(role) {
             let input = document.getElementById("userFlat");
+            let label = document.getElementById("userFlatLabel");
             if (role === "security") {
                 input.value = "GATE-GUARD-01";
                 input.readOnly = true;
+                label.innerText = "Guard Identification Desk";
             } else {
-                input.value = "";
-                input.placeholder = "Flat / Unit No. (e.g. A-302)";
+                input.value = "A-302";
                 input.readOnly = false;
+                label.innerText = "Flat / Unit Number";
             }
         }
 
-        // LOGIN HANDLER
         function handleLogin(e) {
             e.preventDefault();
-            currentRole = document.getElementById("userRole").value;
+            AppState.currentRole = document.getElementById("userRole").value;
             let flat = document.getElementById("userFlat").value;
 
             if (flat) {
-                currentResident = flat;
-                document.getElementById("activeUserDisplay").innerText = (currentRole === "security") ? "Gate Guard ID: 01" : "Flat: " + currentResident;
-                document.getElementById("activeRoleBadge").innerText = currentRole.toUpperCase();
+                AppState.currentResident = flat;
+                document.getElementById("activeUserDisplay").innerText = (AppState.currentRole === "security") ? "Guard ID: 01" : "Flat: " + AppState.currentResident;
+                document.getElementById("activeRoleBadge").innerText = AppState.currentRole.toUpperCase();
                 document.getElementById("loginScreen").style.display = "none";
-                document.getElementById("appContainer").style.display = "block";
+                document.getElementById("appContainer").style.display = "flex";
 
-                // Role Based Interface Visibility
-                if (currentRole === "security") {
-                    document.getElementById("navPrebook").style.display = "none";
-                    document.getElementById("navVisitor").style.display = "none";
-                    document.getElementById("navBilling").style.display = "none";
-                    document.getElementById("navSecurity").style.display = "flex";
-                    renderGuardVisitorTable();
+                let resNav = document.getElementById("residentNavGroup");
+                let guardNav = document.getElementById("guardNavGroup");
+                let titleHeading = document.getElementById("sidebarPortalHeading");
+
+                if (AppState.currentRole === "security") {
+                    resNav.style.display = "none";
+                    guardNav.style.display = "block";
+                    titleHeading.innerText = "Guard Portal";
+                    switchView('securityView', guardNav.querySelector('.nav-item'));
                 } else {
-                    document.getElementById("navPrebook").style.display = "flex";
-                    document.getElementById("navVisitor").style.display = "flex";
-                    document.getElementById("navBilling").style.display = "flex";
-                    document.getElementById("navSecurity").style.display = "none";
+                    resNav.style.display = "block";
+                    guardNav.style.display = "none";
+                    titleHeading.innerText = "Resident Portal";
+                    switchView('dashboardView', resNav.querySelector('.nav-item'));
                 }
-
+                
+                renderAllSyncedViews();
                 initAnalyticsChart();
-                updateMapDisplay();
-                appendLog("User logged in as " + currentRole.toUpperCase() + " (" + currentResident + ")");
             }
         }
 
@@ -655,295 +890,403 @@
             document.getElementById("loginScreen").style.display = "flex";
         }
 
-        // VIEW SWITCHING
         function switchView(viewId, element) {
             document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
+            let target = document.getElementById(viewId);
+            if(target) target.classList.add('active');
 
             if (element) {
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
                 element.classList.add('active');
             }
 
-            if (viewId === 'securityView') {
-                renderGuardVisitorTable();
-            }
+            renderAllSyncedViews();
 
             let titles = {
-                'dashboardView': 'Overview & Live Map',
-                'parkingView': 'Slot Pre-Booking & Access Pass',
-                'visitorView': 'Visitor & Guest Vehicle Registration',
-                'billingView': 'Subscriptions & E-Receipts',
-                'securityView': 'Security Guard Gate Control Dashboard',
+                'dashboardView': 'Live Slot Map & Sensor Telemetry',
+                'parkingView': 'Slot Booking & Digital Access Pass',
+                'visitorView': 'Guest Vehicle Pre-Authorization',
+                'evDockView': 'EV Charging Station Meter',
+                'disputeView': 'Report Slot Violation & Towing Ticket',
+                'subletView': 'Peer-to-Peer Slot Exchange',
+                'guardDutyFeedView': 'Guard Shift Logs & Handover Feed',
+                'sosView': 'Emergency SOS Panic Button',
+                'billingView': 'Subscriptions & PDF Receipts',
                 'carwashView': 'Society Car Wash Service',
+                'residentNoticeView': 'Society Notice Board',
+                'residentChatView': 'General Society Message Board',
+                'securityView': 'SG90 Gate Barrier Control',
+                'guardApprovalsView': 'Pending Guest Approvals Queue',
+                'guardTowingView': 'Reported Violation & Towing Tickets',
+                'directoryView': 'Resident Vehicle Directory Search',
+                'logbookView': 'Guard Shift Duty Logbook',
+                'manualEntryView': 'Manual Visitor Logger',
+                'fineCalculatorView': 'Overstay Fine Calculator',
+                'evacView': 'Emergency Evacuation Mode',
+                'qrScannerView': 'Gate Pass QR Scanner Simulation',
+                'attendanceView': 'Guard Attendance Sign-In',
+                'incidentView': 'Security Incident Log',
+                'ledgerView': 'Export Monthly CSV Audit Ledger',
+                'guardChatView': 'Guard & Admin Message Board',
                 'analyticsView': 'Peak Hour Occupancy Analytics'
             };
-            document.getElementById("currentViewTitle").innerText = titles[viewId];
+            document.getElementById("currentViewTitle").innerText = titles[viewId] || 'Portal';
         }
 
-        // AUDIT LOG SYSTEM
+        // Central Reactive Render Dispatcher
+        function renderAllSyncedViews() {
+            updateMapDisplay();
+            renderGuardVisitorTable();
+            renderTowingTickets();
+            renderDutyLogsFeed();
+            renderChatBoards();
+            syncSOSBanners();
+        }
+
         function appendLog(msg) {
             let logBox = document.getElementById("systemLog");
+            if(!logBox) return;
             let timeStr = new Date().toLocaleTimeString();
             logBox.innerHTML = `[${timeStr}] ${msg}<br>` + logBox.innerHTML;
         }
 
-        // UPDATE MAP LAYOUT & CHECK FULL PARKING CONDITION
         function updateMapDisplay() {
             let vacantCount = 0;
-
             for (let i = 0; i < 3; i++) {
                 let slotNum = i + 1;
                 let box = document.getElementById("mapBox" + slotNum);
                 let icon = document.getElementById("mapIcon" + slotNum);
                 let pill = document.getElementById("mapPill" + slotNum);
 
-                if (slots[i] === "free") {
-                    box.className = "map-slot-box slot-free";
-                    icon.innerText = "🟢";
-                    pill.innerText = "VACANT";
-                    vacantCount++;
-                } else if (slots[i] === "occupied") {
-                    box.className = "map-slot-box slot-occupied";
-                    icon.innerText = "🚘";
-                    pill.innerText = "OCCUPIED";
-                } else if (slots[i] === "reserved") {
-                    box.className = "map-slot-box slot-reserved";
-                    icon.innerText = "🟡";
-                    pill.innerText = "PRE-BOOKED";
+                if (box) {
+                    if (AppState.slots[i] === "free") {
+                        box.className = "map-slot-box slot-free"; icon.innerText = "🟢"; pill.innerText = "VACANT"; vacantCount++;
+                    } else if (AppState.slots[i] === "occupied") {
+                        box.className = "map-slot-box slot-occupied"; icon.innerText = "🚘"; pill.innerText = "OCCUPIED";
+                    } else if (AppState.slots[i] === "reserved") {
+                        box.className = "map-slot-box slot-reserved"; icon.innerText = "🟡"; pill.innerText = "PRE-BOOKED";
+                    }
                 }
             }
-
-            // Update Count
-            document.getElementById("dashAvail").innerText = vacantCount + " / 3";
-
-            // CHECK IF PARKING IS FULL
+            let availBox = document.getElementById("dashAvail");
+            if(availBox) availBox.innerText = vacantCount + " / 3";
             let fullBanner = document.getElementById("fullAlertBanner");
-            let quickBtn = document.getElementById("quickBookBtn");
-            let actionBtn = document.getElementById("prebookActionBtn");
-
-            if (vacantCount === 0) {
-                fullBanner.style.display = "block";
-                if (quickBtn) quickBtn.disabled = true;
-                if (actionBtn) actionBtn.disabled = true;
-            } else {
-                fullBanner.style.display = "none";
-                if (quickBtn) quickBtn.disabled = false;
-                if (actionBtn) actionBtn.disabled = false;
-            }
+            if (vacantCount === 0) { if(fullBanner) fullBanner.style.display = "block"; }
+            else { if(fullBanner) fullBanner.style.display = "none"; }
         }
 
-        // SIMULATE IR SENSOR TOGGLE
         function toggleSensor(slotNum) {
             let idx = slotNum - 1;
-            slots[idx] = (slots[idx] === "occupied") ? "free" : "occupied";
+            AppState.slots[idx] = (AppState.slots[idx] === "occupied") ? "free" : "occupied";
             updateMapDisplay();
-            appendLog(`IR Sensor ${slotNum} state changed to: ${slots[idx].toUpperCase()}`);
-            
-            if (slots.filter(s => s === "free").length === 0) {
-                alert("🚨 ALL PARKING SLOTS ARE NOW OCCUPIED! 'PARKING FULL' ALERT ACTIVATED.");
-                appendLog("⚠️ CRITICAL ALERT: Parking Full triggered.");
-            }
+            appendLog(`IR Sensor ${slotNum} state changed to: ${AppState.slots[idx].toUpperCase()}`);
         }
 
-        // PRE-BOOKING LOGIC WITH QR PASS
         function triggerPreBook() {
             let slotNum = document.getElementById("slotSelect").value;
             let idx = slotNum - 1;
-
-            if (slots[idx] === "free") {
-                slots[idx] = "reserved";
+            if (AppState.slots[idx] === "free") {
+                AppState.slots[idx] = "reserved";
                 updateMapDisplay();
-                let passCode = "PASS-" + currentResident + "-SLOT0" + slotNum;
+                let passCode = "PASS-" + AppState.currentResident + "-SLOT0" + slotNum;
                 document.getElementById("qrPassCode").innerText = passCode;
-                
                 document.getElementById("qrcode").innerHTML = "";
-                qrcodeObj = new QRCode(document.getElementById("qrcode"), { text: passCode, width: 128, height: 128 });
-
-                appendLog(`Slot ${slotNum} Pre-Booked by ${currentResident}. Pass generated: ${passCode}`);
-                alert("Slot " + slotNum + " reserved! QR Pass generated on screen.");
-            } else {
-                alert("Slot " + slotNum + " is currently occupied or already reserved.");
-            }
+                qrcodeObj = new QRCode(document.getElementById("qrcode"), { text: passCode, width: 120, height: 120 });
+                appendLog(`Slot ${slotNum} Pre-Booked by ${AppState.currentResident}. Pass: ${passCode}`);
+                alert("Slot " + slotNum + " reserved successfully!");
+            } else { alert("Slot is currently occupied or reserved."); }
         }
 
-        // VISITOR REGISTRATION
         function registerVisitor() {
             let name = document.getElementById("visitorName").value.trim();
             let plate = document.getElementById("visitorPlate").value.trim();
             if (name && plate) {
-                registeredVisitors.push({
-                    id: Date.now(),
-                    name: name,
-                    plate: plate,
-                    flat: currentResident || "A-302",
-                    status: "PENDING"
-                });
-                appendLog(`Guest Pre-Registered: ${name} (${plate}) for Flat ${currentResident}`);
-                alert(`Guest vehicle ${plate} registered successfully! The gate guard can now approve entry.`);
-                document.getElementById("visitorName").value = "";
+                let timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                AppState.visitors.push({ id: Date.now(), name, plate, flat: AppState.currentResident || "A-302", status: "PENDING", time: timeStr });
+                alert(`Guest ${name} (${plate}) registered for gate clearance!`);
+                document.getElementById("visitorName").value = ""; 
                 document.getElementById("visitorPlate").value = "";
-            } else {
-                alert("Please fill in both the guest name and vehicle number.");
-            }
+                renderAllSyncedViews();
+            } else { alert("Please fill in guest details."); }
         }
 
-        // GUARD VISITOR TABLE RENDER & APPROVAL LOGIC
         function renderGuardVisitorTable() {
             let tbody = document.getElementById("guardVisitorTableBody");
             if (!tbody) return;
-
             tbody.innerHTML = "";
-
-            if (registeredVisitors.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-sub);">No pre-registered visitors found.</td></tr>`;
+            if (AppState.visitors.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">No visitor clearance requests in queue.</td></tr>`;
                 return;
             }
-
-            registeredVisitors.forEach(v => {
-                let statusBadge = v.status === "APPROVED" 
-                    ? `<span style="color: #22c55e; font-weight: bold;">APPROVED 🟢</span>`
-                    : `<span style="color: #eab308; font-weight: bold;">PENDING 🟡</span>`;
-
-                let actionButton = v.status === "PENDING"
-                    ? `<button class="btn" style="margin:0; padding:6px 12px; font-size:12px; background:var(--accent-green);" onclick="approveVisitorByGuard(${v.id})">🟢 Approve & Open Gate</button>`
-                    : `<button class="btn" style="margin:0; padding:6px 12px; font-size:12px; background:#475569;" disabled>Entry Cleared</button>`;
-
-                let row = `
-                    <tr>
-                        <td><strong>${v.name}</strong></td>
-                        <td>${v.plate}</td>
-                        <td>${v.flat}</td>
-                        <td>${statusBadge}</td>
-                        <td>${actionButton}</td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
+            AppState.visitors.forEach(v => {
+                let badge = v.status === "APPROVED" 
+                    ? `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">APPROVED (${v.time})</span>` 
+                    : `<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">PENDING</span>`;
+                
+                let btnHtml = v.status === "PENDING" 
+                    ? `<button class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-xs font-semibold" onclick="approveVisitor(${v.id})">Approve & Open Gate</button>` 
+                    : `<span class="text-slate-500 text-[11px]">Gate Cleared</span>`;
+                
+                tbody.innerHTML += `<tr><td class="p-3 font-semibold">${v.name}</td><td class="p-3 font-mono">${v.plate}</td><td class="p-3">${v.flat}</td><td class="p-3">${badge}</td><td class="p-3">${btnHtml}</td></tr>`;
             });
         }
 
-        function approveVisitorByGuard(visitorId) {
-            let visitor = registeredVisitors.find(v => v.id === visitorId);
-            if (visitor) {
-                visitor.status = "APPROVED";
-                triggerGate('OPEN');
-                appendLog(`Visitor Approved by Guard: ${visitor.name} (${visitor.plate}) for Flat ${visitor.flat}`);
-                alert(`Entry Approved for ${visitor.name} (${visitor.plate})! Barrier Gate Opened.`);
-                renderGuardVisitorTable();
+        function approveVisitor(id) {
+            let v = AppState.visitors.find(item => item.id === id);
+            if(v) { 
+                v.status = "APPROVED"; 
+                triggerGate('OPEN'); 
+                alert(`Gate barrier opened for ${v.name}!`); 
+                renderAllSyncedViews(); 
             }
         }
 
-        // GATE CONTROL LOGIC
-        function triggerGate(state) {
-            let badge = document.getElementById("gateStatusDisplay");
-            if (state === "OPEN") {
-                badge.innerHTML = "GATE STATUS: OPEN 🟢 (SG90 Servo Actuated)";
-                badge.style.color = "#22c55e";
-                appendLog("Gate Barrier opened by Guard.");
-            } else {
-                badge.innerHTML = "GATE STATUS: CLOSED 🔴";
-                badge.style.color = "#ef4444";
-                appendLog("Gate Barrier locked by Guard.");
+        // Sync Dispute & Towing System
+        function raiseDisputeTicket() {
+            let slot = document.getElementById("disputeSlotNo").value.trim(); 
+            let car = document.getElementById("disputeCarNo").value.trim();
+            if(slot && car) { 
+                let timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                AppState.disputes.push({ id: Date.now(), slot, car, flat: AppState.currentResident, status: "ALERTED", time: timeStr });
+                document.getElementById("disputeStatusMsg").innerText = `✅ High-priority ticket dispatch sent to Security Desk for vehicle ${car}.`; 
+                renderAllSyncedViews();
+            } else { alert("Please fill all details."); }
+        }
+
+        function renderTowingTickets() {
+            let container = document.getElementById("guardTowingTicketsList");
+            if(!container) return;
+            container.innerHTML = "";
+            if(AppState.disputes.length === 0) {
+                container.innerHTML = `<div class="text-xs text-slate-500 p-3 bg-slate-900 rounded-lg">No parking violation tickets reported.</div>`;
+                return;
             }
+            AppState.disputes.forEach(d => {
+                let statusBadge = d.status === "RESOLVED"
+                    ? `<span class="text-xs font-bold text-emerald-400">RESOLVED / TOWED</span>`
+                    : `<span class="text-xs font-bold text-red-400 animate-pulse">ACTION REQUIRED</span>`;
+                
+                let actionBtn = d.status !== "RESOLVED"
+                    ? `<button onclick="resolveTowingTicket(${d.id})" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded text-xs font-semibold">Dispatch Towing / Resolve</button>`
+                    : `<span class="text-slate-500 text-xs">Resolved at ${d.resolvedTime || ''}</span>`;
+
+                container.innerHTML += `
+                    <div class="p-4 bg-slate-900 border border-slate-700 rounded-lg flex justify-between items-center">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-sm text-sky-400">${d.slot} Violation</span>
+                                ${statusBadge}
+                            </div>
+                            <p class="text-xs text-slate-300 mt-1">Offending Vehicle: <strong class="font-mono text-amber-400">${d.car}</strong> | Host Flat: ${d.flat}</p>
+                            <span class="text-[10px] text-slate-500">Reported at ${d.time}</span>
+                        </div>
+                        <div>${actionBtn}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function resolveTowingTicket(id) {
+            let t = AppState.disputes.find(item => item.id === id);
+            if(t) {
+                t.status = "RESOLVED";
+                t.resolvedTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                alert(`Towing alert for ${t.car} marked as resolved!`);
+                renderAllSyncedViews();
+            }
+        }
+
+        // Sync Guard Shift Logbook
+        function saveDutyLog() {
+            let name = document.getElementById("dutyGuardName").value.trim(); 
+            let note = document.getElementById("dutyGuardNote").value.trim();
+            if(name && note) { 
+                let timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                AppState.guardDutyLogs.unshift({ id: Date.now(), guard: name, note, time: timeStr });
+                document.getElementById("dutyGuardName").value = "";
+                document.getElementById("dutyGuardNote").value = "";
+                alert("Shift duty log recorded and broadcasted live to Resident Portal!");
+                renderAllSyncedViews();
+            } else { alert("Fill in guard name and note."); }
+        }
+
+        function renderDutyLogsFeed() {
+            let container = document.getElementById("residentGuardDutyLogList");
+            if(!container) return;
+            container.innerHTML = "";
+            if(AppState.guardDutyLogs.length === 0) {
+                container.innerHTML = `<p class="text-slate-500">No shift logs available.</p>`;
+                return;
+            }
+            AppState.guardDutyLogs.forEach(l => {
+                container.innerHTML += `
+                    <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg">
+                        <div class="flex justify-between font-semibold text-sky-400 mb-1">
+                            <span>🛡️ ${l.guard}</span>
+                            <span class="text-[10px] text-slate-500">${l.time}</span>
+                        </div>
+                        <p class="text-slate-300 text-xs">${l.note}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // Sync Emergency SOS Alert
+        function triggerSOS() {
+            AppState.isSOSActive = true;
+            AppState.sosDetails = { flat: AppState.currentResident, time: new Date().toLocaleTimeString() };
+            document.getElementById("sosAlertMsg").innerText = "🚨 SOS EMERGENCY SIGNAL BROADCASTED TO GUARD DESK!";
+            renderAllSyncedViews();
+            alert("Emergency signal dispatched to security guard console!");
+        }
+
+        function clearSOSAlert() {
+            AppState.isSOSActive = false;
+            AppState.sosDetails = null;
+            renderAllSyncedViews();
+        }
+
+        function syncSOSBanners() {
+            let banner = document.getElementById("guardSosGlobalBanner");
+            let inbox = document.getElementById("sosInbox");
+            
+            if(AppState.isSOSActive) {
+                if(banner) {
+                    banner.classList.remove("hidden");
+                    document.getElementById("guardSosBannerDetail").innerText = `Resident Flat ${AppState.sosDetails.flat} activated panic signal at ${AppState.sosDetails.time}.`;
+                }
+                if(inbox) {
+                    inbox.innerHTML = `<span class="text-red-400 font-bold animate-pulse">🚨 HIGH PRIORITY: SOS Emergency active from Flat ${AppState.sosDetails.flat} (${AppState.sosDetails.time})</span>`;
+                }
+            } else {
+                if(banner) banner.classList.add("hidden");
+                if(inbox) inbox.innerHTML = "No active emergency alerts.";
+            }
+        }
+
+        // Sync Two-Way Message Board
+        function sendResidentMessage() {
+            let text = document.getElementById("residentChatInput").value.trim();
+            if(text) {
+                AppState.chatMessages.push({ sender: `Resident (${AppState.currentResident})`, text, type: "resident" });
+                document.getElementById("residentChatInput").value = "";
+                renderChatBoards();
+            }
+        }
+
+        function sendGuardMessage() {
+            let text = document.getElementById("guardChatInput").value.trim();
+            if(text) {
+                AppState.chatMessages.push({ sender: "Security Guard Desk", text, type: "guard" });
+                document.getElementById("guardChatInput").value = "";
+                renderChatBoards();
+            }
+        }
+
+        function renderChatBoards() {
+            let resBox = document.getElementById("residentChatBox");
+            let guardBox = document.getElementById("guardChatBox");
+            
+            let html = AppState.chatMessages.map(m => {
+                let borderClass = m.type === "guard" ? "border-emerald-500" : (m.type === "admin" ? "border-amber-500" : "border-sky-500");
+                return `<div class="p-2.5 bg-slate-900 border-l-4 ${borderClass} rounded-r-lg text-xs">
+                    <strong class="text-slate-200 block mb-0.5">[${m.sender}]:</strong>
+                    <span class="text-slate-300">${m.text}</span>
+                </div>`;
+            }).join('');
+
+            if(resBox) { resBox.innerHTML = html; resBox.scrollTop = resBox.scrollHeight; }
+            if(guardBox) { guardBox.innerHTML = html; guardBox.scrollTop = guardBox.scrollHeight; }
+        }
+
+        // Gate Servo Control
+        function triggerGate(state) {
+            let d = document.getElementById("gateStatusDisplay");
+            if(state === 'OPEN') { d.innerHTML = "GATE BARRIER STATUS: OPENED 🟢 (SG90 Servo Active)"; d.className = "text-lg font-bold text-emerald-400 my-4"; }
+            else { d.innerHTML = "GATE BARRIER STATUS: CLOSED 🔴"; d.className = "text-lg font-bold text-red-500 my-4"; }
+        }
+
+        // EV Charger Subsystem
+        let isCharging = false; let evInt = null; let evUnits = 0;
+        function toggleEVCharging() {
+            let btn = document.getElementById("evToggleBtn");
+            let stat = document.getElementById("evStatusText");
+            if(!isCharging) {
+                isCharging = true; btn.innerText = "Stop Charging Session"; btn.className = "w-full bg-red-600 hover:bg-red-500 text-white font-semibold py-3 rounded-lg text-sm"; stat.innerText = "CHARGING ⚡";
+                evInt = setInterval(() => { evUnits += 0.2; document.getElementById("evUnitsCount").innerText = evUnits.toFixed(1); document.getElementById("evCostCount").innerText = (evUnits * 15).toFixed(0); }, 1000);
+            } else {
+                isCharging = false; btn.innerText = "⚡ Start Charging Session"; btn.className = "w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg text-sm"; stat.innerText = "SESSION COMPLETED ✅";
+                clearInterval(evInt);
+            }
+        }
+
+        function listSubletSlot() {
+            let slot = document.getElementById("subletSlotNo").value; let days = document.getElementById("subletDays").value;
+            if(days) { document.getElementById("subletMarketplace").innerText = `Active: ${slot} listed for ${days}.`; alert("Slot listed on marketplace!"); }
+        }
+
+        function searchVehicleDirectory() {
+            let q = document.getElementById("searchVehicleInput").value.toUpperCase();
+            let res = document.getElementById("directoryResultBox");
+            if(!q) { res.innerHTML = "Enter license plate number above."; return; }
+            let found = AppState.directoryDB.find(v => v.plate.toUpperCase().includes(q));
+            if(found) { res.innerHTML = `<span class="text-emerald-400 font-bold">FOUND IN REGISTRY:</span> ${found.plate} | Registered Owner: <strong>${found.owner}</strong> | Flat: <strong>${found.flat}</strong>`; }
+            else { res.innerHTML = `<span class="text-red-400 font-bold">⚠️ UNKNOWN VEHICLE! Not found in society directory.</span>`; }
         }
 
         function logGuardEntry() {
-            let plate = document.getElementById("secPlate").value;
-            let flat = document.getElementById("secFlat").value;
-            if (plate && flat) {
-                appendLog(`Manual Guard Log: Vehicle ${plate} entered for Flat ${flat}`);
-                alert(`Entry logged for ${plate}`);
-                document.getElementById("secPlate").value = "";
-                document.getElementById("secFlat").value = "";
-            }
+            let plate = document.getElementById("secPlate").value; let flat = document.getElementById("secFlat").value;
+            if(plate && flat) { alert(`Walk-in entry logged for vehicle ${plate}`); document.getElementById("secPlate").value=""; document.getElementById("secFlat").value=""; }
         }
 
-        // PAYMENTS & RECEIPTS
-        function openPayModal(title, amt) {
-            payAmount = amt;
-            document.getElementById("payModalTitle").innerText = title;
-            document.getElementById("payAmountText").innerText = "Total: ₹" + amt;
-            document.getElementById("payModal").style.display = "flex";
+        function calcOverstayFine() {
+            let hrs = document.getElementById("overstayHours").value;
+            if(hrs) { document.getElementById("fineResultBox").innerText = `Total Penalty: ₹${hrs * 50} (${hrs} hrs × ₹50/hr)`; }
         }
 
-        function completePayment() {
-            closeModal('payModal');
-            document.getElementById("dashSub").innerText = "ACTIVE";
-            document.getElementById("dashSub").style.color = "#22c55e";
-            appendLog(`Payment completed: ₹${payAmount} via UPI`);
-            alert("Payment of ₹" + payAmount + " successful!");
+        function triggerEvacMode() { triggerGate('OPEN'); alert("🚨 EVACUATION MODE ACTIVATED: All gates forced open!"); }
+        function simulatePassScan() { let code = document.getElementById("scanPassInput").value; if(code) { document.getElementById("scanResultMsg").innerText = `Pass Validated: ${code} 🟢 Gate Opened.`; document.getElementById("scanResultMsg").className = "text-xs font-bold text-emerald-400 mt-2"; triggerGate('OPEN'); } }
+        function markGuardAttendance() { document.getElementById("attendanceMsg").innerText = "✅ Shift attendance marked at " + new Date().toLocaleTimeString(); }
+        function fileIncidentReport() { alert("Security Incident report officially recorded!"); }
+        function exportCSVLedger() {
+            let csv = "data:text/csv;charset=utf-8,Timestamp,Event,Details\n2026-10-25 18:00,Gate Barrier Opened,Vehicle MH-04-AB-1234\n2026-10-25 19:15,Dispute Reported,Slot 02";
+            let link = document.createElement("a"); link.setAttribute("href", encodeURI(csv)); link.setAttribute("download", "ParkEZ_Audit_Ledger.csv");
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
+        // Payment & PDF Logic
+        let payAmount = 0;
+        function openPayModal(title, amt) { payAmount = amt; document.getElementById("payModalTitle").innerText = title; document.getElementById("payAmountText").innerText = "Total Amount: ₹" + amt; document.getElementById("payModal").style.display = "flex"; }
+        function completePayment() { closeModal('payModal'); document.getElementById("dashSub").innerText = "ACTIVE"; document.getElementById("dashSub").className = "text-2xl font-bold text-emerald-400 my-2"; alert("Payment successful!"); }
         function closeModal(id) { document.getElementById(id).style.display = "none"; }
-
-        function generateReceiptModal() {
-            document.getElementById("rFlat").innerText = currentResident || "A-302";
-            document.getElementById("rTxn").innerText = "TXN-" + Math.floor(100000 + Math.random() * 900000);
-            document.getElementById("receiptModal").style.display = "flex";
-        }
-
-        function downloadPDF() {
-            let elem = document.getElementById('pdfArea');
-            html2pdf().from(elem).save('ParkEZ_Receipt.pdf');
-        }
-
-        function bookWashService() { openPayModal("Car Wash Service", 200); }
+        function generateReceiptModal() { document.getElementById("rFlat").innerText = AppState.currentResident || "A-302"; document.getElementById("rTxn").innerText = "TXN-" + Math.floor(100000 + Math.random() * 900000); document.getElementById("receiptModal").style.display = "flex"; }
+        function downloadPDF() { html2pdf().from(document.getElementById('pdfArea')).save('ParkEZ_Payment_Receipt.pdf'); }
+        function bookWashService() { openPayModal("Society Car Wash Service", 200); }
         function toggleTheme() { document.body.classList.toggle("light-theme"); }
 
-        // CHART.JS INITIALIZATION
+        // Analytics Chart Initialization
+        let chartInstance = null;
         function initAnalyticsChart() {
-            let ctx = document.getElementById('peakChartCanvas').getContext('2d');
-            new Chart(ctx, {
+            let canvas = document.getElementById('peakChartCanvas');
+            if(!canvas) return;
+            let ctx = canvas.getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ['4 PM', '5 PM', '6 PM', '7 PM', '8 PM (Peak)', '9 PM', '10 PM', '11 PM'],
                     datasets: [{
-                        label: 'Occupancy Level (%)',
-                        data: [20, 35, 60, 85, 100, 95, 90, 80],
-                        borderColor: '#38bdf8',
-                        backgroundColor: 'rgba(56, 189, 248, 0.2)',
+                        label: 'Parking Bay Occupancy %',
+                        data: [25, 40, 65, 88, 100, 92, 85, 75],
+                        borderColor: '#0284c7',
+                        backgroundColor: 'rgba(2, 132, 199, 0.2)',
                         fill: true,
                         tension: 0.4
                     }]
                 },
-                options: { responsive: true }
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
     </script>
-    <script>
-  const API_URL = "http://127.0.0.1:8000/api";
-
-  // Fetch slot status from backend every 2 seconds
-  async function fetchStatus() {
-    try {
-      const res = await fetch(`${API_URL}/api/status`);
-      const data = await res.json();
-      console.log("Current System State:", data);
-      
-      // Update your UI elements here based on data.slots
-    } catch (err) {
-      console.error("Backend offline:", err);
-    }
-  }
-
-  // Call this function when a pre-book button is clicked
-  async function bookSlot(slotId) {
-    try {
-      const res = await fetch(`${API_URL}/api/prebook`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slot_id: String(slotId) })
-      });
-      const data = await res.json();
-      alert(data.message || data.detail);
-      fetchStatus();
-    } catch (err) {
-      alert("Error reaching backend");
-    }
-  }
-
-  // Poll state automatically every 2 seconds
-  setInterval(fetchStatus, 2000);
-</script>
 </body>
 </html>
